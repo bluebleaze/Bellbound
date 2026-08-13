@@ -231,6 +231,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
               setIsDodging(false);
               bulletsRef.current = [];
               dodgeStartTime = 0;
+              keysPressedRef.current = {}; // Fix for sticky touch inputs
               setDialogue('Gelombang serangan selesai! Silakan jawab pertanyaan berikutnya.');
             }
 

@@ -815,7 +815,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                   ctx.translate(s.x, s.y);
                   ctx.scale(1 + expand, 1 + expand);
                   
-                  ctx.strokeStyle = '#ffffff';
+                  ctx.strokeStyle = progress.customization.soulColor || '#ef4444';
                   ctx.lineWidth = 1.5 / (1 + expand);
                   
                   ctx.beginPath();
@@ -832,10 +832,10 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                 } else if (s.type === 'line') {
                   ctx.translate(s.x, s.y);
                   ctx.rotate(s.angle || 0);
-                  ctx.fillStyle = '#ffffff';
+                  ctx.fillStyle = progress.customization.soulColor || '#ef4444';
                   ctx.fillRect(0, -1, 8 * s.life, 2); // Shrinks as it fades
                 } else {
-                  ctx.fillStyle = '#ffffff';
+                  ctx.fillStyle = progress.customization.soulColor || '#ef4444';
                   ctx.fillRect(s.x, s.y, 3, 3);
                 }
                 ctx.restore();

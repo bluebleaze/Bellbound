@@ -50,17 +50,20 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-yellow-400 font-bold tracking-wider">LV {progress.lv || 1}</span>
           <span className="text-zinc-300 font-bold max-w-[120px] truncate">
-            ♥ {progress.customization?.name || 'KAMU'}
+            <span style={{ color: progress.customization?.soulColor || '#ef4444' }}>♥</span> {progress.customization?.name || 'KAMU'}
           </span>
         </div>
 
         {/* HP Bar */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-zinc-300 font-bold">HP</span>
-          <div className="w-32 sm:w-40 h-5 sm:h-6 bg-red-950/50 border-2 border-white relative overflow-hidden rounded">
+          <div className="w-32 sm:w-40 h-5 sm:h-6 bg-zinc-900 border-2 border-white relative overflow-hidden rounded shadow-inner">
             <div
-              className="h-full bg-red-500 transition-all duration-200"
-              style={{ width: `${hpPercent}%` }}
+              className="h-full transition-all duration-200"
+              style={{ 
+                width: `${hpPercent}%`,
+                backgroundColor: progress.customization?.soulColor || '#ef4444'
+              }}
             />
           </div>
           <span className="text-sm sm:text-base font-bold text-white min-w-[60px] drop-shadow-md">

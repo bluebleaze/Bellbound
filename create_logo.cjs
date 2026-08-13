@@ -1,0 +1,9 @@
+const fs = require('fs');
+
+const base64PixelLogo = "iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAABwklEQVR4nO2XvUoDQRSFz6xJkFjYWFgIloLgE0gjaJHGQsTawmewtLWyF7GzEewtwTew8AfSpBDB1iLiD4JIdp3J3CwsIeywM/cMDnxg2D13vp2b7M0aQhCE0gZgC8CjLMu0VvUAnADYNcbUdV2/1jRta8x6vT5TFGVa1/X7r2g0GrtRFHVSSt0ZY/aEELcm3+e1Wq2tPM9P1urx3P/W63UAIE+S5NgY42qtzjnnV57n79tYkiRHUsr7FhgAY4yx2+2eCyFu19495/xWCHFbVdVjlmWH9Xr9TwhxYoy5b4NhmnaZpmlHKXUjpXxt42OMOU4p9WpjlFIPa1u+r1YfN20uX23T+k/cE26c2eE8z/1+P68j3DhT2263+9rtdr86EjeOm8P0xN/13u/3r+I4vqzX6xe6ro+jKLpKkuTQGOM6/41vPdd1D8MwvO31eudRFN3/7N9/A35K2hI3hO4m3BC6m3BD6G7CDaG7CTeE7ibcELqbcEPobsINobsJN4TuJtwQuptwQ+huwg2huwk3hO4m3BC6m3BD6G7CDaG7CTeE7ibcELqbcEPobsINobsJN4TuJtwQupvaN6T8AScIgsD4Azq6QJ6h9WJRAAAAAElFTkSuQmCC";
+
+if (!fs.existsSync('public')) {
+  fs.mkdirSync('public');
+}
+fs.writeFileSync('public/logo.png', Buffer.from(base64PixelLogo, 'base64'));
+console.log('Created placeholder public/logo.png');

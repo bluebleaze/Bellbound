@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Prevent default touch behaviors that disrupt gaming */
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}

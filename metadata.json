@@ -1,0 +1,6 @@
+{
+  "name": "Bellbound",
+  "description": "An 8-bit retro pixel RPG and quiz battle game where you explore classrooms, answer subject questions, and dodge bullet-hell attacks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

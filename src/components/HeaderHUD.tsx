@@ -56,31 +56,31 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
         {/* HP Bar */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400 font-bold">HP</span>
-          <div className="w-32 h-4 bg-zinc-900 border-2 border-white relative overflow-hidden rounded">
+          <span className="text-sm text-zinc-300 font-bold">HP</span>
+          <div className="w-32 sm:w-40 h-5 sm:h-6 bg-red-950/50 border-2 border-white relative overflow-hidden rounded">
             <div
-              className="h-full bg-red-600 transition-all duration-200"
+              className="h-full bg-red-500 transition-all duration-200"
               style={{ width: `${hpPercent}%` }}
             />
           </div>
-          <span className="text-xs font-bold text-red-500 min-w-[50px]">
-            {currentHp}/{maxHp}
+          <span className="text-sm sm:text-base font-bold text-white min-w-[60px] drop-shadow-md">
+            {currentHp} / {maxHp}
           </span>
         </div>
       </div>
 
       {/* Enemy Stats (In Battle) */}
       {activeFoe && (
-        <div className="flex items-center gap-3 bg-zinc-950 px-3 py-1 border-2 border-white rounded ">
-          <span className="text-yellow-300 font-bold text-xs sm:text-sm">{activeFoe.name}</span>
-          <div className="w-24 h-3 bg-zinc-950 border border-white relative overflow-hidden">
+        <div className="flex items-center gap-3 bg-zinc-900 px-4 py-1.5 border-2 border-yellow-400 rounded-lg shadow-lg">
+          <span className="text-yellow-400 font-bold text-sm sm:text-base">{activeFoe.name}</span>
+          <div className="w-24 sm:w-32 h-4 sm:h-5 bg-yellow-900/50 border-2 border-white relative overflow-hidden rounded-sm">
             <div
               className="h-full bg-yellow-400 transition-all duration-200"
               style={{ width: `${foeHpPercent}%` }}
             />
           </div>
-          <span className="text-xs font-bold text-yellow-300 min-w-[40px]">
-            {foeHp}/{maxFoeHp}
+          <span className="text-sm sm:text-base font-bold text-white min-w-[50px] drop-shadow-md">
+            {foeHp} / {maxFoeHp}
           </span>
         </div>
       )}

@@ -47,11 +47,16 @@ export function drawPlayerSprite(
     pantsShadow = '#3b4759';
     tieColor = '#dc2626';
   } else if (customization.uniform === 'olahraga') {
-    shirtColor = '#27272a'; // Dark grey/black
-    shirtShadow = '#18181b';
+    shirtColor = '#dc2626'; // Red shirt body
+    shirtShadow = '#b91c1c';
     pantsColor = '#27272a'; // Dark grey/black
     pantsShadow = '#18181b';
     tieColor = '#27272a';
+  }
+
+  let sleeveColor = shirtColor;
+  if (customization.uniform === 'olahraga') {
+    sleeveColor = '#94a3b8'; // Grey sleeves
   }
 
   const skin = customization.skinColor || '#ddb382'; // Natural SMA student skin tone
@@ -125,8 +130,8 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 7.5 * p, 14 * p, 1 * p, 1 * p, tieColor);
 
     // Short Sleeves & Bare Arms
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 2 * p, shirtColor); // Left sleeve
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 2 * p, shirtColor); // Right sleeve
+    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 2 * p, sleeveColor); // Left sleeve
+    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 2 * p, sleeveColor); // Right sleeve
     
     const armY = isWalking ? (walkAlt ? -1 * p : 1 * p) : 0;
     drawPixelRect(ctx, 3 * p, 13 * p + armY, 1 * p, 3 * p, skin); // Left arm
@@ -211,8 +216,8 @@ export function drawPlayerSprite(
     }
 
     // Back Sleeves & Arms
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 2 * p, shirtColor);
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 2 * p, shirtColor);
+    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 2 * p, sleeveColor);
+    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 2 * p, sleeveColor);
 
     const armY = isWalking ? (walkAlt ? -1 * p : 1 * p) : 0;
     drawPixelRect(ctx, 3 * p, 13 * p + armY, 1 * p, 3 * p, skin);
@@ -299,7 +304,7 @@ export function drawPlayerSprite(
 
     // Side Arm
     const armSwing = isWalking ? (walkAlt ? -1 * p : 1 * p) : 0;
-    drawPixelRect(ctx, 6 * p + armSwing, 11 * p, 2 * p, 2 * p, shirtColor);
+    drawPixelRect(ctx, 6 * p + armSwing, 11 * p, 2 * p, 2 * p, sleeveColor);
     drawPixelRect(ctx, 6 * p + armSwing, 13 * p, 2 * p, 3 * p, skin);
 
     // Side Pants & Scissor Legs

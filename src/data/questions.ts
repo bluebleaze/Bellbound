@@ -122,19 +122,18 @@ const bio: Question[] = [
 ];
 
 // Generate Math
-const math: Question[] = [];
-for (let i = 1; i <= 20; i++) {
-  const x = Math.floor(Math.random() * 9) + 2;
-  const y = Math.floor(Math.random() * 9) + 2;
-  const ans = x * y;
-  math.push({
-    id: 'math_'+i,
-    q: 'Hasil dari ' + x + ' × ' + y + ' adalah?',
-    a: [ans.toString(), (ans + 1).toString(), (ans - 2).toString(), (ans + 3).toString()],
-    ok: 0,
-    explanation: x + ' dikalikan dengan ' + y + ' sama dengan ' + ans + '.'
-  });
-}
+const math: Question[] = [
+  { id: 'm1', q: 'Jika 3x - 5 = 10, berapakah nilai x?', a: ['5', '3', '7', '15'], ok: 0, explanation: '3x = 10 + 5 -> 3x = 15, sehingga x = 5.' },
+  { id: 'm2', q: 'Luas segitiga dengan alas 12 cm dan tinggi 5 cm adalah?', a: ['30 cm²', '60 cm²', '20 cm²', '17 cm²'], ok: 0, explanation: 'Rumus luas segitiga: 1/2 × alas × tinggi = 1/2 × 12 × 5 = 30 cm².' },
+  { id: 'm3', q: 'Suku ke-5 dari barisan aritmetika 2, 5, 8, 11, ... adalah?', a: ['14', '12', '15', '17'], ok: 0, explanation: 'Polanya ditambah 3 setiap suku. Suku ke-4 adalah 11, sehingga suku ke-5 adalah 11 + 3 = 14.' },
+  { id: 'm4', q: 'Sebuah sepatu seharga Rp200.000 diskon 20%. Berapa harganya sekarang?', a: ['Rp160.000', 'Rp180.000', 'Rp150.000', 'Rp40.000'], ok: 0, explanation: 'Diskon = 20% × 200.000 = 40.000. Harga setelah diskon = 200.000 - 40.000 = 160.000.' },
+  { id: 'm5', q: 'Hasil dari 2 pangkat 4 (2⁴) adalah?', a: ['16', '8', '32', '64'], ok: 0, explanation: '2 × 2 × 2 × 2 = 16.' },
+  { id: 'm6', q: 'Volume kubus dengan panjang rusuk 3 cm adalah?', a: ['27 cm³', '9 cm³', '18 cm³', '54 cm³'], ok: 0, explanation: 'Rumus volume kubus: s × s × s = 3 × 3 × 3 = 27 cm³.' },
+  { id: 'm7', q: 'Akar kuadrat dari 144 (√144) adalah?', a: ['12', '14', '16', '24'], ok: 0, explanation: '12 dikali 12 menghasilkan 144.' },
+  { id: 'm8', q: 'Peluang munculnya angka ganjil pada pelemparan satu dadu adalah?', a: ['1/2', '1/3', '1/6', '1/4'], ok: 0, explanation: 'Mata dadu ganjil ada 3 (1, 3, 5) dari total 6 mata dadu, sehingga peluangnya 3/6 atau 1/2.' },
+  { id: 'm9', q: 'Dalam sistem koordinat Kartesius, titik (3, -4) berada di kuadran?', a: ['Kuadran IV', 'Kuadran I', 'Kuadran II', 'Kuadran III'], ok: 0, explanation: 'Sumbu x positif dan sumbu y negatif terletak di Kuadran IV (Kanan-Bawah).' },
+  { id: 'm10', q: 'Jika f(x) = 2x + 3, maka nilai dari f(4) adalah?', a: ['11', '7', '12', '9'], ok: 0, explanation: 'Ganti x dengan 4: f(4) = 2(4) + 3 = 8 + 3 = 11.' },
+];
 
 export const QUESTION_BANKS: Record<SubjectId, Question[]> = {
   pkn, rpl, indo, inggris, bio, math

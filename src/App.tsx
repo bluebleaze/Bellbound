@@ -42,6 +42,8 @@ export default function App() {
   const [currentRoom, setCurrentRoom] = useState<'hall' | SubjectId>('pkn');
   const [activeBattleSubject, setActiveBattleSubject] = useState<SubjectId | null>(null);
   const [isDevMenuOpen, setIsDevMenuOpen] = useState(false);
+  const [foeHp, setFoeHp] = useState(0);
+  const [maxFoeHp, setMaxFoeHp] = useState(0);
 
   // Load progress from localStorage if available
   const [progress, setProgress] = useState<GameProgress>(() => {
@@ -49,7 +51,8 @@ export default function App() {
       const saved = localStorage.getItem('last_classroom_progress');
       if (saved) {
         const parsed = JSON.parse(saved);
-        const maxHp = 20;
+        const completedCount = parsed.completedSubjects?.length || 0;
+        const maxHp = 20 + (completedCount * 3);
         const hp = typeof parsed.hp === 'number' && parsed.hp > 0 ? parsed.hp : maxHp;
         return {
           ...INITIAL_PROGRESS,
@@ -110,7 +113,7 @@ export default function App() {
   const handleContinueGame = () => {
     audioEngine.playSelect();
     setProgress((prev) => {
-      const validMax = 20;
+      const validMax = 20 + ((prev.completedSubjects?.length || 0) * 3);
       const validHp = prev.hp && prev.hp > 0 ? prev.hp : validMax;
       return { ...prev, hp: validHp, maxHp: validMax };
     });
@@ -173,7 +176,7 @@ export default function App() {
     
     setTimeout(() => {
       setProgress((prev) => {
-        const validMax = 20;
+        const validMax = 20 + ((prev.completedSubjects?.length || 0) * 3);
         const validHp = prev.hp && prev.hp > 0 ? prev.hp : validMax;
         return {
           ...prev,
@@ -189,7 +192,7 @@ export default function App() {
   const handleBattleVictory = (subject: SubjectId, score: { correct: number, total: number }) => {
     const newCompleted = Array.from(new Set([...progress.completedSubjects, subject])) as SubjectId[];
     const newLv = 1 + newCompleted.length;
-    const newMaxHp = 20;
+    const newMaxHp = 20 + (newCompleted.length * 3);
 
     setProgress((prev) => ({
       ...prev,
@@ -214,7 +217,7 @@ export default function App() {
   const handleRetry = () => {
     audioEngine.playSelect();
     setProgress((prev) => {
-      const validMax = 20;
+      const validMax = 20 + ((prev.completedSubjects?.length || 0) * 3);
       return {
         ...prev,
         hp: validMax,
@@ -232,8 +235,8 @@ export default function App() {
           onLogout={handleResetGame}
         progress={progress}
         activeFoe={activeBattleSubject && gameState === 'battle' ? FOES[activeBattleSubject] : null}
-        foeHp={6}
-        maxFoeHp={6}
+        foeHp={foeHp}
+        maxFoeHp={maxFoeHp}
         onToggleSound={handleToggleSound}
         onOpenNotes={() => setIsNotesOpen(true)}
         onOpenCustomizer={() => setIsCustomizerOpen(true)}
@@ -271,12 +274,53 @@ export default function App() {
         {/* TITLE SCREEN */}
         {gameState === 'title' && (
           <div className="max-w-xl w-full bg-zinc-950/80 backdrop-blur-sm border-4 border-white p-8 rounded shadow-2xl text-center flex flex-col justify-center space-y-8 relative overflow-hidden my-auto h-full sm:h-auto">
-            <div className="space-y-4">
-              <img src="/logo.png" alt="Logo Sekolah" className="w-24 h-24 mx-auto object-contain drop-shadow-[0_4px_4px_rgba(250,204,21,0.5)]" onError={(e) => e.currentTarget.style.display = 'none'} />
-              <h1 className="text-5xl sm:text-7xl font-extrabold text-white tracking-widest drop-shadow-[0_4px_4px_rgba(250,204,21,0.5)]">
-                BELLBOUND
+            <style>
+              {`
+                @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+                @keyframes waveBounce {
+                  0%, 100% { transform: translateY(0); }
+                  50% { transform: translateY(-10px); }
+                }
+                .animate-wave {
+                  animation: waveBounce 1.2s ease-in-out infinite;
+                }
+                .pixel-title {
+                  font-family: 'Press Start 2P', monospace;
+                }
+              `}
+            </style>
+            <div className="space-y-6">
+              <div className="flex justify-center animate-wave" style={{ animationDelay: '0s' }}>
+                <img 
+                  src="/logo.png" 
+                  alt="Logo Sekolah" 
+                  className="w-24 h-24 sm:w-32 sm:h-32 object-contain drop-shadow-[0_4px_4px_rgba(250,204,21,0.5)]" 
+                  onError={(e) => e.currentTarget.style.display = 'none'} 
+                />
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-widest drop-shadow-[0_4px_0px_rgba(250,204,21,0.8)] flex items-center justify-center pixel-title mt-4">
+                {"BELLBOUND".split("").map((char, i) => (
+                  <span 
+                    key={i} 
+                    className="inline-block animate-wave"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                  >
+                    {char === 'O' ? (
+                      <img 
+                        src="/favicon.png" 
+                        alt="O" 
+                        className="inline-block w-8 h-8 sm:w-12 sm:h-12 object-contain -mt-2 mx-1 drop-shadow-md" 
+                        style={{ imageRendering: 'pixelated' }} 
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.insertAdjacentText('afterend', 'O');
+                        }}
+                      />
+                    ) : char}
+                  </span>
+                ))}
               </h1>
-              <span className="inline-block text-xs text-yellow-400 font-bold uppercase tracking-widest border border-yellow-500/50 bg-yellow-400/10 px-3 py-1 rounded">
+              <span className="inline-block text-xs sm:text-sm text-yellow-400 font-bold uppercase tracking-widest border border-yellow-500/50 bg-yellow-400/10 px-3 py-1 rounded pixel-title mt-4">
                 INDONESIAN RETRO SCHOOL RPG
               </span>
             </div>
@@ -427,6 +471,10 @@ export default function App() {
             subject={activeBattleSubject}
             progress={progress}
             onUpdateHp={(newHp) => setProgress((p) => ({ ...p, hp: newHp }))}
+            onUpdateFoeHp={(hp, max) => {
+              setFoeHp(hp);
+              setMaxFoeHp(max);
+            }}
             onVictory={handleBattleVictory}
             onGameOver={handleGameOver}
           />

@@ -25,12 +25,17 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
     },
     {
       title: 'ARENA JIWA (MENGHINDAR)',
-      content: 'Setelah menjawab (atau jika kamu salah jawab), guru akan menyerang! Kamu mengendalikan Hati (Soul). Gunakan WASD/Panah untuk menggerakan Hati dan hindari semua proyektil selama waktu belum habis!',
+      content: 'Setelah menjawab, guru akan menyerang! Gunakan WASD/Panah untuk menggerakan Hati (Soul) dan hindari proyektil selama waktu belum habis!',
       icon: '♥️'
     },
     {
+      title: 'GRAZE & TP BAR',
+      content: 'Jika kamu berhasil menghindar sangat tipis (menyerempet peluru tanpa terkena damage), kamu akan mendapatkan efek GRAZE dan mengisi TP Bar di pojok kiri atas. Kumpulkan 5 TP untuk memulihkan 1 kuota aksi [ITEM] (Heal)!',
+      icon: '⚡'
+    },
+    {
       title: 'TIPS PENTING!',
-      content: 'Kamu bisa menggunakan shortcut angka [1], [2], [3], [4] di keyboard untuk memilih aksi atau jawaban lebih cepat. Jangan lupa perhatikan nyawamu (HP). Selamat berjuang meraih nilai kelulusan!',
+      content: 'Gunakan shortcut angka [1], [2], [3], [4] di keyboard untuk memilih aksi atau jawaban lebih cepat. Jangan lupa perhatikan nyawamu (HP). Selamat berjuang!',
       icon: '💡'
     }
   ];

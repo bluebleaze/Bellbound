@@ -9,6 +9,7 @@ interface BattleArenaProps {
   subject: SubjectId;
   progress: GameProgress;
   onUpdateHp: (newHp: number) => void;
+  onUpdateFoeHp?: (hp: number, max: number) => void;
   onVictory: (subject: SubjectId, score: { correct: number, total: number }) => void;
   onGameOver: () => void;
 }
@@ -17,10 +18,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   subject,
   progress,
   onUpdateHp,
+  onUpdateFoeHp,
   onVictory,
   onGameOver,
 }) => {
   const foe = FOES[subject];
+  const maxFoeHp = progress.difficulty === "extreme" ? 30 : progress.difficulty === "hard" ? 20 : 10;
   const [questions] = useState(() => {
     let base = [...QUESTION_BANKS[subject]];
     let required = progress.difficulty === 'extreme' ? 30 : progress.difficulty === 'hard' ? 20 : 10;
@@ -56,7 +59,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const [qIndex, setQIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalQuestionsAnswered, setTotalQuestionsAnswered] = useState(0);
-  const [foeHp, setFoeHp] = useState(progress.difficulty === "extreme" ? 30 : progress.difficulty === "hard" ? 20 : 10);
+  const [foeHp, setFoeHp] = useState(maxFoeHp);
   const [isDodging, setIsDodging] = useState(false);
   const [dialogue, setDialogue] = useState(`Selamat datang di ${foe.name}. Saatnya kerjakan ujian berikut!`);
   const [showQuestions, setShowQuestions] = useState(false);
@@ -68,6 +71,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const [mercyActive, setMercyActive] = useState(false);
   const [isHitFlashing, setIsHitFlashing] = useState(false);
   const [isMathCorrectDodge, setIsMathCorrectDodge] = useState(false);
+
+  useEffect(() => {
+    if (onUpdateFoeHp) {
+      onUpdateFoeHp(foeHp, maxFoeHp);
+    }
+  }, [foeHp, maxFoeHp, onUpdateFoeHp]);
 
   // Canvas & Loop Refs for 100% bug-free 60FPS bullet dodge engine
   const arenaCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -81,6 +90,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const keysPressedRef = useRef<Record<string, boolean>>({});
   const mercyActiveRef = useRef(false);
   const hintBonusRef = useRef(false);
+  const tpRef = useRef(0);
   const isMathCorrectDodgeRef = useRef(false);
   const currentDurationRef = useRef(6500);
   const currentHpRef = useRef(progress.hp);
@@ -620,6 +630,24 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                   b.grazed = true;
                   audioEngine.playGraze(); // "Tik" sound like TP in Deltarune
                   
+                  tpRef.current += 1;
+                  if (tpRef.current >= 5) {
+                    tpRef.current = 0;
+                    setActUsesLeft(prev => prev + 1);
+                    audioEngine.playSelect(); // Notify player they got a heal item back
+                    
+                    // Add a big flashy text spark for ITEM UP
+                    grazeSparksRef.current.push({
+                      type: 'line',
+                      x: soulX,
+                      y: soulY - 20,
+                      vx: 0,
+                      vy: -1,
+                      life: 2.0,
+                      angle: 0
+                    });
+                  }
+                  
                   // Add Deltarune-style expanding white outline around soul
                   grazeSparksRef.current.push({
                     type: 'soul_outline',
@@ -670,6 +698,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             ctx.textAlign = 'right';
             ctx.textBaseline = 'top';
             ctx.fillText(`⏱️ ${secLeft}s`, canvas.width - 4, 7);
+            ctx.restore();
+
+            // DRAW TP (GRAZE) BAR
+            ctx.save();
+            ctx.fillStyle = tpRef.current >= 5 ? '#facc15' : '#22c55e';
+            ctx.font = 'bold 10px monospace';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(`TP ${Math.min(5, tpRef.current)}/5`, 4, 7);
+            
+            ctx.fillStyle = '#27272a';
+            ctx.fillRect(4, 18, 30, 4);
+            ctx.fillStyle = tpRef.current >= 5 ? '#facc15' : '#22c55e';
+            ctx.fillRect(4, 18, 30 * (Math.min(5, tpRef.current) / 5), 4);
             ctx.restore();
 
             // DRAW BULLETS ON CANVAS

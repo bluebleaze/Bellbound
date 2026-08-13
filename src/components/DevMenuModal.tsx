@@ -55,6 +55,20 @@ export const DevMenuModal: React.FC<DevMenuModalProps> = ({ progress, setProgres
           
           <button
             onClick={() => {
+              setProgress(p => ({ ...p, completedSubjects: ['pkn', 'rpl', 'indo', 'inggris', 'bio'] }));
+              if (gameState !== 'walk') {
+                // If they are in a battle, it might be weird, but let's just update the progress
+                // The easiest way is to let them do it from Overworld.
+              }
+              onClose();
+            }}
+            className="w-full py-2 bg-red-700 hover:bg-red-600 text-white font-bold rounded"
+          >
+            Skip to Final Boss (Math)
+          </button>
+
+          <button
+            onClick={() => {
               setProgress(p => ({ ...p, completedSubjects: ['pkn', 'rpl', 'indo', 'inggris', 'bio', 'math'] }));
             }}
             className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded"

@@ -306,10 +306,35 @@ export const Overworld: React.FC<OverworldProps> = ({
            setWalkFrame((f) => f + 1);
            lastWalkTime.current = now;
         }
-
         setPlayerPos((prev) => {
-          const newX = Math.max(10, Math.min(590, prev.x + dx));
-          const newY = Math.max(110, Math.min(290, prev.y + dy));
+          let newX = Math.max(10, Math.min(590, prev.x + dx));
+          let newY = Math.max(110, Math.min(290, prev.y + dy));
+
+          if (currentRoom !== 'hall') {
+            const checkCollision = (cx: number, cy: number) => {
+              const px = cx + 20; // center of player
+              const py = cy + 55; // feet of player
+              // Check student desks
+              for (let col = 0; col < 3; col++) {
+                for (let row = 0; row < 4; row++) {
+                  const dx = 165 + (col * 120);
+                  const dy = 165 + (row * 45);
+                  // Desk is 70x32. Tighten padding so player can weave between desks.
+                  if (px > dx - 5 && px < dx + 75 && py > dy + 5 && py < dy + 32) return true;
+                }
+              }
+              // Check teacher desk (90x35)
+              if (px > 500 - 5 && px < 500 + 95 && py > 130 + 5 && py < 130 + 35) return true;
+              return false;
+            };
+
+            if (checkCollision(newX, prev.y)) newX = prev.x;
+            if (checkCollision(prev.x, newY)) newY = prev.y;
+            if (checkCollision(newX, newY)) {
+              newX = prev.x;
+              newY = prev.y;
+            }
+          }
 
           // Check Proximity to Teachers / Doors
           if (currentRoom === 'hall') {
@@ -329,7 +354,7 @@ export const Overworld: React.FC<OverworldProps> = ({
 
             doorLocs.forEach((d) => {
               // Only allow entry if it's the current subject
-              if (Math.abs(newX - d.x) < 30 && newY < 170) {
+              if (Math.abs(newX - d.x) < 30 && newY < 125) {
                 if (isDoorUnlocked(d.id)) {
                   onChangeRoom(d.id);
                 } else if (completedSubjects.includes(d.id)) {
@@ -348,7 +373,7 @@ export const Overworld: React.FC<OverworldProps> = ({
             }
           } else {
             // Classroom: Exit door check
-            if (Math.abs(newX - 20) < 35 && newY < 160) {
+            if (Math.abs(newX - 20) < 35 && newY < 125) {
               if (currentRoom === 'pkn' && !completedSubjects.includes('pkn')) {
                 setDialogueText('Pak Arif (GURU PKN) tersenyum: "Selesaikan ujian PKN terlebih dahulu sebelum pergi ke lorong!"');
               } else {
@@ -386,6 +411,8 @@ export const Overworld: React.FC<OverworldProps> = ({
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keysPressed.current[e.key] = true;
+      keysPressed.current[e.key.toLowerCase()] = true;
+      keysPressed.current[e.key.toUpperCase()] = true;
 
       // Space / Enter to talk to near teacher
       if ((e.key === ' ' || e.key === 'Enter') && nearTeacher) {
@@ -395,13 +422,21 @@ export const Overworld: React.FC<OverworldProps> = ({
 
     const onKeyUp = (e: KeyboardEvent) => {
       keysPressed.current[e.key] = false;
+      keysPressed.current[e.key.toLowerCase()] = false;
+      keysPressed.current[e.key.toUpperCase()] = false;
+    };
+
+    const onBlur = () => {
+      keysPressed.current = {};
     };
 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
     };
   }, [nearTeacher, onEnterBattle]);
 

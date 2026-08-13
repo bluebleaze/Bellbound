@@ -72,7 +72,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   // Canvas & Loop Refs for 100% bug-free 60FPS bullet dodge engine
   const arenaCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const hitFlashUntilRef = useRef<number>(0);
-  const grazeSparksRef = useRef<{x: number, y: number, life: number, vx: number, vy: number, type?: 'line'|'box', angle?: number, size?: number}[]>([]);
+  const grazeSparksRef = useRef<{x: number, y: number, life: number, vx: number, vy: number, type?: 'line'|'soul_outline', angle?: number, size?: number}[]>([]);
   const shatterRef = useRef<{active: boolean, timer: number, pieces: any[]}>({active: false, timer: 0, pieces: []});
   const soulPosRef = useRef({ x: 112, y: 52 }); // Center of 240x120 box
   const bulletsRef = useRef<ActiveBullet[]>([]);
@@ -140,16 +140,25 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keysPressedRef.current[e.key] = true;
+      keysPressedRef.current[e.key.toLowerCase()] = true;
+      keysPressedRef.current[e.key.toUpperCase()] = true;
     };
     const onKeyUp = (e: KeyboardEvent) => {
       keysPressedRef.current[e.key] = false;
+      keysPressedRef.current[e.key.toLowerCase()] = false;
+      keysPressedRef.current[e.key.toUpperCase()] = false;
+    };
+    const onBlur = () => {
+      keysPressedRef.current = {};
     };
 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
     };
   }, []);
 
@@ -291,8 +300,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     size: 16,
                   });
                 } else if (mode === 1) {
-                  // Rain of Garuda from top (Sweeping wave)
+                  // Rain of Garuda and Stars from top (Sweeping wave)
                   const xRatio = ((pIdx % 6) + 1) / 7;
+                  const isStar = pIdx % 3 === 0;
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
                     x: xRatio * canvas.width,
@@ -301,12 +311,14 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: 1.5,
                     color: '#fbbf24', // gold
                     subject,
-                    shape: 'garuda',
-                    size: 16,
+                    shape: isStar ? 'emoji' : 'garuda',
+                    label: isStar ? '⭐' : undefined,
+                    size: 14,
                   });
                 } else {
-                  // Diagonal Cross Flags from top corners
+                  // Diagonal Scales of Justice and Shields from top corners
                   const fromRightCorner = pIdx % 2 === 0;
+                  const isJustice = pIdx % 3 === 0;
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
                     x: fromRightCorner ? canvas.width + 10 : -10,
@@ -315,8 +327,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: 1.2,
                     color,
                     subject,
-                    shape: 'rect',
-                    size: 16,
+                    shape: 'emoji',
+                    label: isJustice ? '⚖️' : '🛡️',
+                    size: 14,
                   });
                 }
               } else if (subject === 'rpl') {
@@ -607,9 +620,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                   b.grazed = true;
                   audioEngine.playGraze(); // "Tik" sound like TP in Deltarune
                   
-                  // Add Deltarune-style expanding white box around soul
+                  // Add Deltarune-style expanding white outline around soul
                   grazeSparksRef.current.push({
-                    type: 'box',
+                    type: 'soul_outline',
                     x: soulX,
                     y: soulY,
                     vx: 0,
@@ -748,18 +761,32 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             });
 
             // DRAW GRAZE SPARKS
-            grazeSparksRef.current.forEach((s, idx) => {
+            grazeSparksRef.current = grazeSparksRef.current.filter((s) => {
               s.x += s.vx;
               s.y += s.vy;
               s.life -= 0.05;
               if (s.life > 0) {
                 ctx.save();
                 ctx.globalAlpha = s.life;
-                if (s.type === 'box') {
-                  const size = s.size! + (1.0 - s.life) * 15; // Expands as life decreases
+                if (s.type === 'soul_outline') {
+                  const expand = (1.0 - s.life) * 1.5; // Expands as life decreases
+                  ctx.translate(s.x, s.y);
+                  ctx.scale(1 + expand, 1 + expand);
+                  
                   ctx.strokeStyle = '#ffffff';
-                  ctx.lineWidth = 2;
-                  ctx.strokeRect(s.x - size / 2, s.y - size / 2, size, size);
+                  ctx.lineWidth = 1.5 / (1 + expand);
+                  
+                  ctx.beginPath();
+                  ctx.moveTo(0, 4);
+                  ctx.lineTo(-5, -1);
+                  ctx.lineTo(-5, -5);
+                  ctx.lineTo(-2, -5);
+                  ctx.lineTo(0, -3);
+                  ctx.lineTo(2, -5);
+                  ctx.lineTo(5, -5);
+                  ctx.lineTo(5, -1);
+                  ctx.closePath();
+                  ctx.stroke();
                 } else if (s.type === 'line') {
                   ctx.translate(s.x, s.y);
                   ctx.rotate(s.angle || 0);
@@ -770,9 +797,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                   ctx.fillRect(s.x, s.y, 3, 3);
                 }
                 ctx.restore();
-              } else {
-                grazeSparksRef.current.splice(idx, 1);
+                return true;
               }
+              return false;
             });
           } else {
             dodgeStartTime = 0;
@@ -781,6 +808,16 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
           // DRAW SOUL HEART (PIXEL ART)
           ctx.save();
+          
+          if (subject === 'math') {
+            // Heartbeat effect for final boss (Math teacher)
+            const time = Date.now() / 500; // 500ms cycle
+            const pulse = Math.max(0, Math.sin(time * Math.PI * 2)) * 0.15; // Pulse up 15%, then rest
+            ctx.translate(soulPosRef.current.x, soulPosRef.current.y);
+            ctx.scale(1 + pulse, 1 + pulse);
+            ctx.translate(-soulPosRef.current.x, -soulPosRef.current.y);
+          }
+
           const isFlashing = Date.now() < hitFlashUntilRef.current;
           ctx.fillStyle = isFlashing ? '#ffffff' : (progress.customization.soulColor || '#ef4444');
           
@@ -959,15 +996,23 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (isDodging || showQuestions) return;
-      if (e.key === '1' || e.key.toLowerCase() === 'z') handleThink();
-      if (e.key === '2' || e.key.toLowerCase() === 'x') handleObserve();
-      if (e.key === '3' || e.key.toLowerCase() === 'c') handleAct();
-      if (e.key === '4' || e.key.toLowerCase() === 'v') handleTalk();
+      if (isDodging) return; // Don't trigger actions if dodging
+
+      if (showQuestions && currentQ.qType !== 'essay') {
+        if (e.key === '1' || e.key.toLowerCase() === 'a') handleAnswer(0);
+        if (e.key === '2' || e.key.toLowerCase() === 'b') handleAnswer(1);
+        if (e.key === '3' || e.key.toLowerCase() === 'c') handleAnswer(2);
+        if (e.key === '4' || e.key.toLowerCase() === 'd') handleAnswer(3);
+      } else if (!showQuestions) {
+        if (e.key === '1' || e.key.toLowerCase() === 'z') handleThink();
+        if (e.key === '2' || e.key.toLowerCase() === 'x') handleObserve();
+        if (e.key === '3' || e.key.toLowerCase() === 'c') handleAct();
+        if (e.key === '4' || e.key.toLowerCase() === 'v') handleTalk();
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  });
+  }, [isDodging, showQuestions, currentQ]);
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto font-mono text-white select-none">
@@ -1096,95 +1141,98 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
         )}
       </div>
 
-      {/* Dialogue / Multiple Choice Answers Container */}
-      <div className="w-full bg-zinc-900 border-x-8 border-t-4 border-amber-900 p-4 min-h-[110px]">
-        {showQuestions ? (
-          <div className="flex flex-col h-full overflow-y-auto pr-2 relative">
-            {progress.difficulty !== 'normal' && (
-              <div className="absolute top-0 right-0 text-red-500 font-bold text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] animate-pulse">
-                ⏳ {questionTimer}s
-              </div>
-            )}
-            <span className="text-yellow-400 font-bold text-xs mb-1">SOAL {qIndex % questions.length + 1} / {questions.length} - {currentQ.qType === 'essay' ? 'ESAI' : 'PILIHAN GANDA'}</span>
-            <span className="text-zinc-300 font-bold text-sm mb-4 leading-relaxed pr-10">
-              {currentQ.q}
-            </span>
-            {currentQ.qType === 'essay' ? (
-              <div className="flex flex-col gap-2 mt-auto">
-                <input 
-                  type="text" 
-                  value={essayAnswer}
-                  onChange={(e) => setEssayAnswer(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAnswer(essayAnswer); }}
-                  placeholder="Ketik jawaban (singkat)..."
-                  className="p-3 bg-zinc-900 border-2 border-zinc-600 focus:border-yellow-400 text-white font-bold rounded outline-none w-full"
-                  autoFocus
-                />
-                <button 
-                  onClick={() => handleAnswer(essayAnswer)}
-                  className="bg-yellow-600 hover:bg-yellow-500 text-black font-bold p-2 rounded"
-                >SUBMIT JAWABAN</button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-auto">
-                {currentQ.a.map((option, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleAnswer(idx)}
-                    className="p-2.5 bg-zinc-900 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-300 text-left font-bold text-xs rounded transition-colors"
-                  >
-                    <span className="text-yellow-400 mr-2">[{String.fromCharCode(65 + idx)}]</span>
-                    {option}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm leading-relaxed text-zinc-200 flex items-start gap-2">
-            <span className="text-yellow-400 font-bold">💬</span>
-            <span>{dialogue}</span>
-          </p>
-        )}
-      </div>
+      {/* Container for Dialogue and Actions with transition animation */}
+      <div key={isDodging ? 'dodge' : 'action'} className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Dialogue / Multiple Choice Answers Container */}
+        <div className="w-full bg-zinc-900 border-x-8 border-t-4 border-amber-900 p-4 min-h-[110px]">
+          {showQuestions ? (
+            <div className="flex flex-col h-full overflow-y-auto pr-2 relative">
+              {progress.difficulty !== 'normal' && (
+                <div className="absolute top-0 right-0 text-red-500 font-bold text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] animate-pulse">
+                  ⏳ {questionTimer}s
+                </div>
+              )}
+              <span className="text-yellow-400 font-bold text-xs mb-1">SOAL {qIndex % questions.length + 1} / {questions.length} - {currentQ.qType === 'essay' ? 'ESAI' : 'PILIHAN GANDA'}</span>
+              <span className="text-zinc-300 font-bold text-sm mb-4 leading-relaxed pr-10">
+                {currentQ.q}
+              </span>
+              {currentQ.qType === 'essay' ? (
+                <div className="flex flex-col gap-2 mt-auto">
+                  <input 
+                    type="text" 
+                    value={essayAnswer}
+                    onChange={(e) => setEssayAnswer(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleAnswer(essayAnswer); }}
+                    placeholder="Ketik jawaban (singkat)..."
+                    className="p-3 bg-zinc-900 border-2 border-zinc-600 focus:border-yellow-400 text-white font-bold rounded outline-none w-full"
+                    autoFocus
+                  />
+                  <button 
+                    onClick={() => handleAnswer(essayAnswer)}
+                    className="bg-yellow-600 hover:bg-yellow-500 text-black font-bold p-2 rounded"
+                  >SUBMIT JAWABAN</button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-auto">
+                  {currentQ.a.map((option, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleAnswer(idx)}
+                      className="p-2.5 bg-zinc-900 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-300 text-left font-bold text-xs rounded transition-colors"
+                    >
+                      <span className="text-yellow-400 mr-2">[{idx + 1} atau {String.fromCharCode(65 + idx)}]</span>
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed text-zinc-200 flex items-start gap-2">
+              <span className="text-yellow-400 font-bold">💬</span>
+              <span>{dialogue}</span>
+            </p>
+          )}
+        </div>
 
-      {/* BIG FIGHT BUTTON (Separated) */}
-      <div className="w-full bg-zinc-900 border-x-8 border-amber-900 p-3 flex justify-center">
-        <button
-          onClick={handleThink}
-          disabled={isDodging}
-          className="w-full sm:w-2/3 py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40 text-black font-extrabold text-lg sm:text-xl rounded-xl border-4 border-yellow-200 shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
-        >
-          <Brain size={24} /> <span>JAWAB SOAL (FIGHT)</span>
-        </button>
-      </div>
+        {/* BIG FIGHT BUTTON (Separated) */}
+        <div className="w-full bg-zinc-900 border-x-8 border-amber-900 p-3 flex justify-center">
+          <button
+            onClick={handleThink}
+            disabled={isDodging}
+            className="w-full sm:w-2/3 py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40 text-black font-extrabold text-lg sm:text-xl rounded-xl border-4 border-yellow-200 shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+          >
+            <Brain size={24} /> <span>JAWAB SOAL (FIGHT) [1]</span>
+          </button>
+        </div>
 
-      {/* Other Command Action Bar */}
-      <div className="w-full bg-zinc-900 border-x-8 border-b-8 border-amber-900 p-3 grid grid-cols-3 gap-2 rounded-b">
-        <button
-          onClick={handleObserve}
-          disabled={isDodging}
-          className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
-        >
-          <div className="flex items-center gap-1"><Eye size={16} /> <span>CEK</span></div>
-          <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Info Lawan)</span>
-        </button>
-        <button
-          onClick={handleTalk}
-          disabled={isDodging}
-          className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
-        >
-          <div className="flex items-center gap-1"><MessageSquare size={16} /> <span>MERCY [4/V]</span></div>
-          <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Diskusi)</span>
-        </button>
-        <button
-          onClick={handleAct}
-          disabled={isDodging}
-          className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-green-400 hover:text-green-300 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
-        >
-          <div className="flex items-center gap-1"><Heart size={16} /> <span>ITEM [3/C]</span></div>
-          <span className="text-[10px] font-normal text-zinc-400 group-hover:text-green-200">({actUsesLeft}x Sisa)</span>
-        </button>
+        {/* Other Command Action Bar */}
+        <div className="w-full bg-zinc-900 border-x-8 border-b-8 border-amber-900 p-3 grid grid-cols-3 gap-2 rounded-b">
+          <button
+            onClick={handleObserve}
+            disabled={isDodging}
+            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+          >
+            <div className="flex items-center gap-1"><Eye size={16} /> <span>CEK [2]</span></div>
+            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Info Lawan)</span>
+          </button>
+          <button
+            onClick={handleAct}
+            disabled={isDodging}
+            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-green-400 hover:text-green-300 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+          >
+            <div className="flex items-center gap-1"><Heart size={16} /> <span>ITEM [3]</span></div>
+            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-green-200">({actUsesLeft}x Sisa)</span>
+          </button>
+          <button
+            onClick={handleTalk}
+            disabled={isDodging}
+            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+          >
+            <div className="flex items-center gap-1"><MessageSquare size={16} /> <span>MERCY [4]</span></div>
+            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Diskusi)</span>
+          </button>
+        </div>
       </div>
     </div>
   );

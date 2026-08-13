@@ -3,6 +3,17 @@ import { PlayerCustomization } from '../types';
 import { drawPlayerSprite } from './PixelSprites';
 import { X, Check } from 'lucide-react';
 
+const soulColors = [
+  { name: 'Merah (Determinasi)', value: '#ef4444' },
+  { name: 'Cyan (Kesabaran)', value: '#06b6d4' },
+  { name: 'Oranye (Keberanian)', value: '#f97316' },
+  { name: 'Biru (Integritas)', value: '#3b82f6' },
+  { name: 'Ungu (Kegigihan)', value: '#a855f7' },
+  { name: 'Hijau (Kebaikan)', value: '#22c55e' },
+  { name: 'Kuning (Keadilan)', value: '#eab308' },
+  { name: 'Pink (Cinta)', value: '#ec4899' }
+];
+
 interface CustomizerModalProps {
   customization: PlayerCustomization;
   onSave: (updated: PlayerCustomization) => void;
@@ -25,15 +36,15 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({ customization,
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw preview sprite (shifted left slightly)
-      drawPlayerSprite(ctx, 48, 32, form, 'down', 0, 4);
+      // Draw preview sprite (shifted left)
+      drawPlayerSprite(ctx, 24, 32, form, 'down', 0, 4);
 
       // Draw Soul preview (pulsing heart) next to character
       const time = Date.now() / 300;
       const pulse = Math.sin(time) * 1.5;
       
       ctx.save();
-      ctx.translate(112, 64);
+      ctx.translate(120, 72);
       ctx.scale(2 + pulse * 0.1, 2 + pulse * 0.1);
       
       ctx.fillStyle = form.soulColor || '#ef4444';
@@ -54,10 +65,14 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({ customization,
       ctx.restore();
       
       // Add text label below soul
+      const currentSoul = soulColors.find(s => s.value === (form.soulColor || '#ef4444'));
+      const match = currentSoul?.name.match(/\((.*?)\)/);
+      const traitName = match ? match[1].toUpperCase() : 'SOUL';
+
       ctx.fillStyle = '#a1a1aa';
-      ctx.font = 'bold 10px monospace';
+      ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('SOUL', 112, 110);
+      ctx.fillText(traitName, 120, 115);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -81,17 +96,6 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({ customization,
     { name: 'Sawo Matang', value: '#c68642' },
     { name: 'Gelap', value: '#8d5524' },
     { name: 'Hitam Gelap', value: '#3d2314' },
-  ];
-
-  const soulColors = [
-    { name: 'Determination (Merah)', value: '#ef4444' },
-    { name: 'Patience (Cyan)', value: '#06b6d4' },
-    { name: 'Bravery (Orange)', value: '#f97316' },
-    { name: 'Integrity (Biru)', value: '#3b82f6' },
-    { name: 'Perseverance (Ungu)', value: '#a855f7' },
-    { name: 'Kindness (Hijau)', value: '#22c55e' },
-    { name: 'Justice (Kuning)', value: '#eab308' },
-    { name: 'Love (Pink)', value: '#ec4899' }
   ];
 
   return (

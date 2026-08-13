@@ -41,17 +41,17 @@ export function drawPlayerSprite(
     pantsShadow = '#451a03';
     tieColor = '#dc2626';
   } else if (customization.uniform === 'batik') {
-    shirtColor = '#b45309';
-    shirtShadow = '#92400e';
-    pantsColor = '#1e293b';
-    pantsShadow = '#0f172a';
-    tieColor = '#78350f';
+    shirtColor = '#ffffff';
+    shirtShadow = '#e2e8f0';
+    pantsColor = '#536279'; // Default SMA grey pants
+    pantsShadow = '#3b4759';
+    tieColor = '#dc2626';
   } else if (customization.uniform === 'olahraga') {
-    shirtColor = '#0284c7';
-    shirtShadow = '#0369a1';
-    pantsColor = '#0f172a';
-    pantsShadow = '#020617';
-    tieColor = '#0284c7';
+    shirtColor = '#27272a'; // Dark grey/black
+    shirtShadow = '#18181b';
+    pantsColor = '#27272a'; // Dark grey/black
+    pantsShadow = '#18181b';
+    tieColor = '#27272a';
   }
 
   const skin = customization.skinColor || '#ddb382'; // Natural SMA student skin tone
@@ -110,10 +110,12 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 4 * p, 14 * p, 8 * p, 1 * p, shirtShadow);
     if (customization.uniform === 'batik') {
        // Add batik dots pattern
-       ctx.fillStyle = '#fcdbb3'; // Goldish/light dots
+       ctx.fillStyle = '#dc2626'; // Red dots
        ctx.fillRect(5 * p, 11 * p, 1 * p, 1 * p);
        ctx.fillRect(7 * p, 12 * p, 1 * p, 1 * p);
        ctx.fillRect(10 * p, 11 * p, 1 * p, 1 * p);
+       
+       ctx.fillStyle = '#94a3b8'; // Grey dots
        ctx.fillRect(5 * p, 13 * p, 1 * p, 1 * p);
        ctx.fillRect(9 * p, 13 * p, 1 * p, 1 * p);
     }
@@ -160,7 +162,13 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, rightLegX, rightLegY + 5 * p, 2 * p, 1 * p, skin); // Ankles
     drawPixelRect(ctx, rightLegX, rightLegY + 6 * p, 2 * p, 1 * p, outline); // Shoes
 
-    if (customization.gender === 'female') {
+    if (customization.uniform === 'olahraga') {
+      // Red stripe on the sides of the training pants
+      drawPixelRect(ctx, leftLegX, leftLegY, 1 * p, 5 * p, '#dc2626');
+      drawPixelRect(ctx, rightLegX + 1 * p, rightLegY, 1 * p, 5 * p, '#dc2626');
+    }
+
+    if (customization.gender === 'female' && customization.uniform !== 'olahraga') {
       drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
       drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
     } else {
@@ -192,10 +200,12 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 4 * p, 11 * p, 8 * p, 4 * p, shirtColor);
     drawPixelRect(ctx, 4 * p, 14 * p, 8 * p, 1 * p, shirtShadow);
     if (customization.uniform === 'batik') {
-       ctx.fillStyle = '#fcdbb3';
+       ctx.fillStyle = '#dc2626'; // Red dots
        ctx.fillRect(5 * p, 11 * p, 1 * p, 1 * p);
        ctx.fillRect(8 * p, 11 * p, 1 * p, 1 * p);
        ctx.fillRect(10 * p, 12 * p, 1 * p, 1 * p);
+       
+       ctx.fillStyle = '#94a3b8'; // Grey dots
        ctx.fillRect(6 * p, 13 * p, 1 * p, 1 * p);
        ctx.fillRect(9 * p, 13 * p, 1 * p, 1 * p);
     }
@@ -234,7 +244,13 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 9 * p, rightLegY + 5 * p, 2 * p, 1 * p, skin);
     drawPixelRect(ctx, 9 * p, rightLegY + 6 * p, 2 * p, 1 * p, outline);
 
-    if (customization.gender === 'female') {
+    if (customization.uniform === 'olahraga') {
+      // Red stripe on the sides of the training pants
+      drawPixelRect(ctx, 5 * p, leftLegY, 1 * p, 5 * p, '#dc2626');
+      drawPixelRect(ctx, 10 * p, rightLegY, 1 * p, 5 * p, '#dc2626');
+    }
+
+    if (customization.gender === 'female' && customization.uniform !== 'olahraga') {
       drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
       drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
     } else {
@@ -268,6 +284,17 @@ export function drawPlayerSprite(
 
     // Side Shirt & Tie
     drawPixelRect(ctx, 5 * p, 10 * p, 6 * p, 5 * p, shirtColor);
+    
+    if (customization.uniform === 'batik') {
+      ctx.fillStyle = '#dc2626'; // Red dots
+      ctx.fillRect(6 * p, 11 * p, 1 * p, 1 * p);
+      ctx.fillRect(8 * p, 12 * p, 1 * p, 1 * p);
+      
+      ctx.fillStyle = '#94a3b8'; // Grey dots
+      ctx.fillRect(7 * p, 13 * p, 1 * p, 1 * p);
+      ctx.fillRect(9 * p, 11 * p, 1 * p, 1 * p);
+    }
+    
     drawPixelRect(ctx, 9 * p, 10 * p, 1 * p, 3 * p, tieColor); // Tie side profile
 
     // Side Arm
@@ -289,14 +316,20 @@ export function drawPlayerSprite(
     }
 
     drawPixelRect(ctx, leg1X, 15 * p, 2.5 * p, 5 * p, pantsColor);
+    if (customization.uniform === 'olahraga') {
+      drawPixelRect(ctx, leg1X + 1 * p, 15 * p, 1 * p, 5 * p, '#dc2626');
+    }
     drawPixelRect(ctx, leg1X, 20 * p, 2.5 * p, 1 * p, skin);
     drawPixelRect(ctx, leg1X, 21 * p, 2.5 * p, 1 * p, outline);
 
     drawPixelRect(ctx, leg2X, 15 * p, 2.5 * p, 5 * p, pantsColor);
+    if (customization.uniform === 'olahraga') {
+      drawPixelRect(ctx, leg2X + 1 * p, 15 * p, 1 * p, 5 * p, '#dc2626');
+    }
     drawPixelRect(ctx, leg2X, 20 * p, 2.5 * p, 1 * p, skin);
     drawPixelRect(ctx, leg2X, 21 * p, 2.5 * p, 1 * p, outline);
 
-    if (customization.gender === 'female') {
+    if (customization.gender === 'female' && customization.uniform !== 'olahraga') {
        drawPixelRect(ctx, 4.5 * p, 15 * p, 7 * p, 4 * p, pantsColor); // Skirt
        drawPixelRect(ctx, 4.5 * p, 19 * p, 7 * p, 1 * p, pantsShadow); // Skirt shadow
     }

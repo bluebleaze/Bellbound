@@ -3,6 +3,16 @@ import { PlayerCustomization } from '../types';
 import { drawPlayerSprite } from './PixelSprites';
 import { ArrowRight, User } from 'lucide-react';
 
+const soulColors = [
+  { name: 'Merah (Determinasi)', value: '#ef4444' },
+  { name: 'Cyan (Kesabaran)', value: '#06b6d4' },
+  { name: 'Oranye (Keberanian)', value: '#f97316' },
+  { name: 'Biru (Integritas)', value: '#3b82f6' },
+  { name: 'Ungu (Kegigihan)', value: '#a855f7' },
+  { name: 'Hijau (Kebaikan)', value: '#22c55e' },
+  { name: 'Kuning (Keadilan)', value: '#eab308' },
+];
+
 interface LoginScreenProps {
   customization: PlayerCustomization;
   onSave: (updated: PlayerCustomization) => void;
@@ -14,6 +24,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
   const initialName = (customization.name === 'KAMU' || customization.name === 'Siswa') ? '' : customization.name;
   const [form, setForm] = React.useState<PlayerCustomization>({ ...customization, name: initialName || '' });
   const [difficulty, setDifficulty] = React.useState<"normal" | "hard" | "extreme">("normal");
+  const [highlightName, setHighlightName] = React.useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -28,15 +39,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw preview sprite (shifted left slightly)
-      drawPlayerSprite(ctx, 16, 12, form, 'down', 0, 4);
+      // Draw preview sprite (shifted left)
+      drawPlayerSprite(ctx, 24, 32, form, 'down', 0, 4);
 
       // Draw Soul preview (pulsing heart) next to character
       const time = Date.now() / 300;
       const pulse = Math.sin(time) * 1.5;
       
       ctx.save();
-      ctx.translate(72, 48); // Position inside 96x120 canvas
+      ctx.translate(120, 72); // Position inside 160x160 canvas
       ctx.scale(2 + pulse * 0.1, 2 + pulse * 0.1);
       
       ctx.fillStyle = form.soulColor || '#ef4444';
@@ -57,10 +68,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
       ctx.restore();
       
       // Add text label below soul
+      const currentSoul = soulColors.find(s => s.value === (form.soulColor || '#ef4444'));
+      const match = currentSoul?.name.match(/\((.*?)\)/);
+      const traitName = match ? match[1].toUpperCase() : 'SOUL';
+
       ctx.fillStyle = '#a1a1aa';
-      ctx.font = 'bold 8px monospace';
+      ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('SOUL', 72, 85);
+      ctx.fillText(traitName, 120, 115);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -88,24 +103,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
     { name: 'Hitam Gelap', value: '#3d2314' },
   ];
 
-  const soulColors = [
-    { name: 'Merah (Determination)', value: '#ef4444' },
-    { name: 'Cyan (Patience)', value: '#06b6d4' },
-    { name: 'Orange (Bravery)', value: '#f97316' },
-    { name: 'Biru (Integrity)', value: '#3b82f6' },
-    { name: 'Ungu (Perseverance)', value: '#a855f7' },
-    { name: 'Hijau (Kindness)', value: '#22c55e' },
-    { name: 'Kuning (Justice)', value: '#eab308' },
-  ];
-
   return (
     <div className="max-w-3xl w-full bg-zinc-950/90 backdrop-blur-md border-4 border-white p-8 rounded shadow-2xl flex flex-col md:flex-row gap-8 relative overflow-hidden my-auto animate-in zoom-in duration-300">
       
       {/* Left side - Avatar preview */}
       <div className="flex-shrink-0 flex flex-col items-center justify-center space-y-4 md:w-1/3 border-r-2 border-zinc-800 pr-8">
-        <div className="text-xl font-bold text-yellow-400 mb-2 border-b-2 border-zinc-800 pb-2 w-full text-center">ID CARD (v2)</div>
+        <div className="text-xl font-bold text-yellow-400 mb-2 border-b-2 border-zinc-800 pb-2 w-full text-center">ID CARD</div>
         <div className="w-40 h-40 bg-black rounded-lg border-4 border-white flex items-center justify-center overflow-hidden shadow-inner">
-          <canvas ref={canvasRef} width={96} height={120} className="scale-125" />
+          <canvas ref={canvasRef} width={160} height={160} />
         </div>
         <div className="text-center">
           <div className="text-2xl font-black text-white">{form.name}</div>
@@ -117,8 +122,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
       <div className="flex-grow space-y-5">
         <div>
           <label className="block text-zinc-400 text-xs font-bold mb-1">NAMA SISWA</label>
-          <div className="flex bg-black border-2 border-zinc-700 rounded focus-within:border-white transition-colors">
-            <div className="px-3 py-2 text-zinc-500 flex items-center justify-center">
+          <div className={`flex border-2 rounded transition-all duration-300 ${highlightName ? 'border-red-500 bg-red-950/40 shadow-[0_0_15px_rgba(239,68,68,0.5)] scale-[1.02]' : 'bg-black border-zinc-700 focus-within:border-white'}`}>
+            <div className={`px-3 py-2 flex items-center justify-center ${highlightName ? 'text-red-400' : 'text-zinc-500'}`}>
               <User size={16} />
             </div>
             <input
@@ -230,9 +235,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
 
         <div className="pt-6">
           <button
-            onClick={() => { onSave(form); onStart(form, difficulty); }}
-            disabled={!form.name.trim()}
-            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:border-zinc-900 text-black font-extrabold border-b-4 border-yellow-700 rounded text-xl flex items-center justify-center gap-2 transition-all shadow-md active:border-b-0 active:translate-y-1"
+            onClick={() => { 
+              if (!form.name.trim()) {
+                setHighlightName(true);
+                setTimeout(() => setHighlightName(false), 1500);
+                return;
+              }
+              onSave(form); 
+              onStart(form, difficulty); 
+            }}
+            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-extrabold border-b-4 border-yellow-700 rounded text-xl flex items-center justify-center gap-2 transition-all shadow-md active:border-b-0 active:translate-y-1"
           >
             <span>MULAI PERJALANAN</span>
             <ArrowRight size={20} />

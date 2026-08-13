@@ -12,6 +12,7 @@ import { StudyNotesModal } from './components/StudyNotesModal';
 import { VictoryModal } from './components/VictoryModal';
 import { ScheduleModal, CalendarModal } from './components/ScheduleModal';
 import { GameSidebar } from './components/GameSidebar';
+import { TutorialModal } from './components/TutorialModal';
 import { audioEngine } from './utils/AudioEngine';
 import { Play, Sparkles, BookOpen, RotateCcw } from 'lucide-react';
 
@@ -451,6 +452,12 @@ export default function App() {
         )}
 
       {/* MODALS */}
+      {gameState === 'walk' && progress.completedSubjects.length === 0 && !progress.hasSeenTutorial && (
+        <TutorialModal 
+          onClose={() => setProgress(p => ({ ...p, hasSeenTutorial: true }))} 
+        />
+      )}
+
       {isCustomizerOpen && (
         <CustomizerModal
           customization={progress.customization}

@@ -67,6 +67,7 @@ export interface GameProgress {
   soundEnabled: boolean;
   bgmVolume: number;
   difficulty: 'normal' | 'hard' | 'extreme';
+  hasSeenTutorial?: boolean;
 }
 
 export interface ScheduleItem {

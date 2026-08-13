@@ -866,18 +866,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const handleObserve = () => {
     audioEngine.playSelect();
     setShowQuestions(false);
-    setHintBonus(true);
-    const currentQ = questions[qIndex % questions.length];
-    const correctAns = currentQ.a[currentQ.ok];
-    setDialogue(`OBSERVE: ${foe.clue} (Info: Jawaban benarnya adalah "${correctAns}". Damage salah sisa 1 HP!)`);
+    setDialogue(`OBSERVE: ATK dan DEF guru tidak diketahui. ${foe.clue}`);
   };
 
-    const handleTalk = () => {
+  const handleTalk = () => {
     audioEngine.playSelect();
     setShowQuestions(false);
-    
-    const currentQ = questions[qIndex % questions.length];
-    setDialogue(`MERCY: Kamu berdiskusi dengan ${foe.label}. (Kisi-kisi: ${currentQ.explanation})`);
+    const hints = [
+      "Guru terlihat tidak ingin membuang waktu.",
+      "Mungkin jawabannya ada di pelajaran minggu lalu.",
+      "Tetap fokus dan perhatikan pilihan gandanya!",
+      "Jangan ragu-ragu dalam menjawab."
+    ];
+    const hint = hints[Math.floor(Math.random() * hints.length)];
+    setDialogue(`MERCY: Kamu mencoba berdiskusi. ${foe.label} berkata: "${hint}"`);
   };
 
   const handleAct = () => {

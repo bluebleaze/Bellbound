@@ -1132,6 +1132,25 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
           />
         </div>
 
+        {/* Local HP Bar (Undertale Style) */}
+        <div className="w-full max-w-[280px] flex items-center justify-between mt-3 text-xs sm:text-sm font-bold text-white">
+          <span className="truncate max-w-[80px]">{progress.customization.name}</span>
+          <span className="text-yellow-400">LV {progress.lv || 1}</span>
+          <div className="flex items-center gap-2">
+            <span>HP</span>
+            <div className="w-20 h-4 bg-zinc-900 border border-white">
+              <div 
+                className="h-full transition-all duration-100" 
+                style={{ 
+                  width: `${Math.max(0, Math.min(100, ((progress.hp || 0) / (progress.maxHp || 20)) * 100))}%`,
+                  backgroundColor: progress.customization.soulColor || '#ef4444' 
+                }} 
+              />
+            </div>
+            <span>{progress.hp} / {progress.maxHp || 20}</span>
+          </div>
+        </div>
+
         {/* Touch D-Pad Controls for Soul Dodge on Mobile */}
         {isDodging && (
           <div className="mt-2 flex justify-between items-center touch-none select-none w-full max-w-[280px] mx-auto">

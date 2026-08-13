@@ -24,8 +24,8 @@ const INITIAL_PROGRESS: GameProgress = {
   scores: {},
   difficulty: 'normal',
   customization: {
-    name: 'KAMU',
-    uniform: 'sma',
+    name: '',
+    uniform: 'smk',
     hairColor: '#451a03',
     skinColor: '#e0ac69',
     gender: 'male',
@@ -58,6 +58,7 @@ export default function App() {
           customization: {
             ...INITIAL_PROGRESS.customization,
             ...(parsed.customization || {}),
+            uniform: parsed.customization?.uniform === 'sma' ? 'smk' : (parsed.customization?.uniform || 'smk'),
           },
         };
       }
@@ -533,9 +534,11 @@ export default function App() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-zinc-900 border-t-2 border-zinc-700 p-2 flex flex-col items-center gap-1 text-center text-yellow-500 text-xs font-mono font-bold z-10 relative">
+      <footer className="bg-zinc-900 border-t-2 border-zinc-700 p-3 flex flex-col items-center gap-2 text-center text-yellow-500 text-xs font-mono font-bold z-10 relative">
         <span>BELLBOUND · Pelajari pola. Pelajari ilmu. Jangan paksa pintu.</span>
-        <span className="text-zinc-500 text-[10px]">Created by: Nabil Abhitah Abyasha XIC & Hilyatul Aulia XIC</span>
+        <span className="text-zinc-400 text-xs font-sans font-medium tracking-wide opacity-80 uppercase">
+          © 2026 Nabil Abhitah Abyasha XIC & Hilyatul Aulia XIC ANGKATAN 27
+        </span>
       </footer>
     </div>
   );

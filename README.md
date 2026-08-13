@@ -1,13 +1,13 @@
 # Bellbound
 
-**Bellbound** adalah game RPG edukasi bergaya *8-bit pixel art* yang digabungkan dengan mekanik *bullet-hell* (seperti Undertale). Di dalam game ini, pemain berperan sebagai seorang siswa/siswi SMA yang harus berpetualang dan menghadapi berbagai "Ujian" dari guru-guru mata pelajaran di sekolah.
+**Bellbound** adalah game RPG edukasi bergaya *8-bit pixel art* yang digabungkan dengan mekanik *bullet-hell* (seperti Undertale). Di dalam game ini, pemain berperan sebagai seorang siswa/siswi SMK yang harus berpetualang dan menghadapi berbagai "Ujian" dari guru-guru mata pelajaran di sekolah.
 
 Tantang refleksmu dalam menghindari serangan proyektil (peluru) unik dari setiap guru dan asah otakmu dengan menjawab pertanyaan-pertanyaan pelajaran untuk memenangkan pertarungan!
 
 ## Fitur Utama
 
 - **Kustomisasi Karakter Lengkap**: Sesuaikan nama, gender, jenis seragam (OSIS, Pramuka, Batik, Olahraga), warna rambut, warna kulit, dan warna *Soul* kamu. Sprite karakter 8-bit akan secara dinamis berubah sesuai pilihanmu.
-- **Eksplorasi Overworld SMA**: Jelajahi area sekolah, dekati meja guru, dan bersiaplah untuk ujian.
+- **Eksplorasi Overworld SMK**: Jelajahi area sekolah, dekati meja guru, dan bersiaplah untuk ujian.
 - **Sistem Pertarungan Unik (Bullet-Hell + Kuis)**: 
   - **Fase Bertahan (Dodge Phase)**: Hindari serangan khusus dari masing-masing guru (misal: bentuk Geometri dari Guru Matematika, Sel Virus & DNA dari Guru Biologi, Kosakata & Buku dari Guru Bahasa Inggris).
   - **Fase Menjawab (Answer Phase)**: Jawab soal edukasi sesuai mata pelajaran untuk mengurangi HP Guru.

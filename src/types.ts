@@ -32,7 +32,7 @@ export interface TeacherFoe {
 
 export interface PlayerCustomization {
   name: string;
-  uniform: 'sma' | 'pramuka' | 'batik' | 'olahraga';
+  uniform: 'smk' | 'pramuka' | 'batik' | 'olahraga';
   hairColor: string;
   skinColor: string;
   gender: 'male' | 'female';

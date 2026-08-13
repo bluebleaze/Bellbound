@@ -148,7 +148,7 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({ customization,
                 onChange={(e) => setForm({ ...form, uniform: e.target.value as PlayerCustomization['uniform'] })}
                 className="w-full bg-zinc-900 border-2 border-zinc-600 focus:border-yellow-400 px-3 py-1.5 text-white font-mono rounded outline-none"
               >
-                <option value="sma">Seragam SMA (Putih-Abu)</option>
+                <option value="smk">Seragam SMK (Putih-Abu)</option>
                 <option value="pramuka">Seragam Pramuka (Cokelat)</option>
                 <option value="batik">Seragam Batik Sekolah</option>
                 <option value="olahraga">Seragam Olahraga (Biru)</option>

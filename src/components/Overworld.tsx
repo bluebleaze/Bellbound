@@ -532,17 +532,12 @@ export const Overworld: React.FC<OverworldProps> = ({
               onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); pressDirection('ArrowLeft', true); }}
               onPointerUp={() => pressDirection('ArrowLeft', false)}
               onPointerLeave={() => pressDirection('ArrowLeft', false)}
-              onPointerCancel={() => pressDirection('ArrowLeft', false)}
-              className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
-            >
-              <ArrowLeft size={24} />
-            </button>
             <button
               onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); pressDirection('ArrowRight', true); }}
               onPointerUp={() => pressDirection('ArrowRight', false)}
               onPointerLeave={() => pressDirection('ArrowRight', false)}
               onPointerCancel={() => pressDirection('ArrowRight', false)}
-              className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
+              className="w-1/2 h-16 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
             >
               <ArrowRight size={24} />
             </button>

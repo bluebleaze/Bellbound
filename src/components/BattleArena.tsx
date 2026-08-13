@@ -202,18 +202,16 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
           // Grid pattern background
           ctx.strokeStyle = '#18181b';
           ctx.lineWidth = 1;
+          ctx.beginPath();
           for (let x = 0; x < canvas.width; x += 20) {
-            ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, canvas.height);
-            ctx.stroke();
           }
           for (let y = 0; y < canvas.height; y += 20) {
-            ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(canvas.width, y);
-            ctx.stroke();
           }
+          ctx.stroke();
 
           // IF IN DODGE PHASE: Process Movement, Bullet Spawning, Collisions
           if (isDodgingRef.current) {
@@ -717,7 +715,6 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
             // DRAW BULLETS ON CANVAS
             bulletsRef.current.forEach((b) => {
-              ctx.save();
               if (b.shape === 'rect') {
                 // Indonesian Flag Bullet (Upper Red, Lower White)
                 ctx.fillStyle = '#ef4444';
@@ -800,7 +797,6 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                 ctx.textBaseline = 'middle';
                 ctx.fillText(b.label || '•', b.x, b.y);
               }
-              ctx.restore();
             });
 
             // DRAW GRAZE SPARKS

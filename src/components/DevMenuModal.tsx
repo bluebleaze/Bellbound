@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
-import { GameProgress, SubjectId } from '../types';
+import { GameProgress, SubjectId, GAME_SCHEDULE } from '../types';
 
 interface DevMenuModalProps {
   progress: GameProgress;
   setProgress: React.Dispatch<React.SetStateAction<GameProgress>>;
   onClose: () => void;
-  onForceVictory: () => void;
+  onForceVictory: (subject?: SubjectId) => void;
   activeBattleSubject: SubjectId | null;
   gameState: string;
 }
 
 export const DevMenuModal: React.FC<DevMenuModalProps> = ({ progress, setProgress, onClose, onForceVictory, activeBattleSubject, gameState }) => {
+  const currentLevelIndex = progress.completedSubjects.length;
+  const currentStage = currentLevelIndex < GAME_SCHEDULE.length ? GAME_SCHEDULE[currentLevelIndex].subjectId : null;
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="bg-zinc-900 border-4 border-purple-500 rounded p-6 max-w-sm w-full space-y-4">
         <h2 className="text-xl font-bold text-purple-400 border-b-2 border-purple-800 pb-2">🛠️ DEV MENU</h2>
         
         <div className="space-y-2">
+          {currentStage && (
+            <button
+              onClick={() => {
+                onForceVictory(currentStage);
+                onClose();
+              }}
+              className="w-full py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded"
+            >
+              Skip Current Stage (Win)
+            </button>
+          )}
+
           {gameState === 'battle' && activeBattleSubject && (
             <button
               onClick={() => {
-                onForceVictory();
+                onForceVictory(activeBattleSubject);
                 onClose();
               }}
               className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded"

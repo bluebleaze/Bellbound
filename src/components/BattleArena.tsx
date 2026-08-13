@@ -427,12 +427,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: Math.sin(pIdx) * 0.2,
                     color,
                     subject,
-                    shape: 'text',
-                    label: `➜ ${verbs[pIdx % verbs.length]}`,
+                    shape: 'book',
                     size: 14,
                   });
                 } else if (mode === 1) {
-                  // Reverse Arrow Verbs
+                  // Emoji Letters
+                  const letters = ['🅰️', '🅱️', '🔤', '📖', '🇬🇧'];
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
                     x: canvas.width + 30,
@@ -441,9 +441,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: Math.cos(pIdx) * 0.2,
                     color,
                     subject,
-                    shape: 'text',
-                    label: `${verbs[(pIdx + 1) % verbs.length]} ↵`,
-                    size: 14,
+                    shape: 'emoji',
+                    label: letters[pIdx % letters.length],
+                    size: 16,
                   });
                 } else {
                   // Vocab Falling Drop
@@ -456,7 +456,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     color,
                     subject,
                     shape: 'text',
-                    label: 'ABC',
+                    label: verbs[pIdx % verbs.length],
                     size: 14,
                   });
                 }
@@ -477,7 +477,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     size: 12,
                   });
                 } else if (mode === 1) {
-                  // DNA Dual Strand Wave
+                  // DNA & Microbes Emojis
+                  const bioEmojis = ['🧬', '🦠', '🌿', '🍄', '🔬'];
                   const angle = spawnCounter * 0.15;
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
@@ -487,8 +488,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: 1.4,
                     color,
                     subject,
-                    shape: 'circle',
-                    size: 10,
+                    shape: 'emoji',
+                    label: bioEmojis[pIdx % bioEmojis.length],
+                    size: 16,
                   });
                 } else {
                   // Cell Spores From Center Side
@@ -500,7 +502,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: Math.cos(pIdx * 2) * 0.8,
                     color,
                     subject,
-                    shape: 'circle',
+                    shape: 'virus',
                     size: 12,
                   });
                 }
@@ -523,8 +525,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     size: 14,
                   });
                 } else if (mode === 1) {
-                  // Operators Rain (+, -, ×, ÷)
-                  const ops = ['+', '−', '×', '÷', 'π', '√'];
+                  // Square Geometry Rain
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
                     x: ((pIdx % 6) + 1) / 7 * canvas.width,
@@ -533,12 +534,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: 1.4,
                     color,
                     subject,
-                    shape: 'text',
-                    label: ops[pIdx % ops.length],
-                    size: 15,
+                    shape: 'square',
+                    size: 14,
                   });
                 } else {
-                  // Inward Ring Inflow (Pattern sequence angles)
+                  // Inward Ring Inflow Emojis
+                  const mathEmojis = ['📐', '📏', '🔢', '➕', '➖'];
                   const angle = (pIdx % 8) * (Math.PI / 4); // 45 degree steps
                   bulletsRef.current.push({
                     id: spawnCounter.toString(),
@@ -548,8 +549,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     vy: -Math.sin(angle) * 1.2,
                     color,
                     subject,
-                    shape: 'triangle',
-                    size: 12,
+                    shape: 'emoji',
+                    label: mathEmojis[pIdx % mathEmojis.length],
+                    size: 16,
                   });
                 }
               }
@@ -695,6 +697,45 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                 ctx.fill();
                 ctx.strokeStyle = '#ffffff';
                 ctx.stroke();
+              } else if (b.shape === 'square') {
+                // Math Square
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x - 6, b.y - 6, 12, 12);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x - 6, b.y - 6, 12, 12);
+              } else if (b.shape === 'virus') {
+                // Bio Virus
+                ctx.fillStyle = b.color;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 6; i++) {
+                  const angle = (Math.PI * 2 / 6) * i + (Date.now() / 300);
+                  ctx.beginPath();
+                  ctx.moveTo(b.x, b.y);
+                  ctx.lineTo(b.x + Math.cos(angle) * (b.size/1.2), b.y + Math.sin(angle) * (b.size/1.2));
+                  ctx.stroke();
+                }
+                ctx.fillStyle = '#111';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size / 4, 0, Math.PI * 2);
+                ctx.fill();
+              } else if (b.shape === 'book') {
+                // English Book
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x - 7, b.y - 5, 14, 10);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(b.x - 5, b.y - 4, 4, 8);
+                ctx.fillRect(b.x + 1, b.y - 4, 4, 8);
+              } else if (b.shape === 'emoji') {
+                // General Emojis
+                ctx.font = `${b.size + 4}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(b.label || '❓', b.x, b.y);
               } else {
                 // Text Bullets (RPL <div/>, Indo Letters, English Verbs)
                 ctx.fillStyle = b.color;

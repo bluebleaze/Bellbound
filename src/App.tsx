@@ -509,9 +509,10 @@ export default function App() {
           progress={progress}
           setProgress={setProgress}
           onClose={() => setIsDevMenuOpen(false)}
-          onForceVictory={() => {
-             if (activeBattleSubject) {
-                handleBattleVictory(activeBattleSubject, { correct: 10, total: 10 });
+          onForceVictory={(subj) => {
+             const targetSubject = subj || activeBattleSubject;
+             if (targetSubject) {
+                handleBattleVictory(targetSubject, { correct: 10, total: 10 });
              }
           }}
           activeBattleSubject={activeBattleSubject}

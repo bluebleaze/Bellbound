@@ -27,12 +27,6 @@ export function drawPlayerSprite(
   ctx.save();
   ctx.translate(Math.floor(x), Math.floor(y));
 
-  // Drop shadow
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-  ctx.beginPath();
-  ctx.ellipse(8 * scale, 22 * scale, 8 * scale, 3 * scale, 0, 0, Math.PI * 2);
-  ctx.fill();
-
   // Colors accurately sampled from the asset image
   let shirtColor = '#ffffff'; // Crisp white SMA shirt
   let shirtShadow = '#e2e8f0'; // Shirt fold shadow
@@ -81,7 +75,6 @@ export function drawPlayerSprite(
     // Hair Base & Volume
     drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, outline); // Hair top outline
     drawPixelRect(ctx, 3 * p, 1 * p, 10 * p, 4 * p, hair);   // Hair main dome
-    drawPixelRect(ctx, 2 * p, 2 * p, 12 * p, 3 * p, hair);
 
     // Face Skin
     drawPixelRect(ctx, 4 * p, 5 * p, 8 * p, 4 * p, skin);
@@ -138,15 +131,14 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 12 * p, 13 * p - armY, 1 * p, 3 * p, skin); // Right arm
 
     // Shirt Outlines
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 5 * p, outline);
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 5 * p, outline);
-    drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 1 * p, outline);
+    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 4 * p, outline);
+    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 4 * p, outline);
 
     // Pants & Legs
     let leftLegX = 5 * p;
-    let leftLegY = 16 * p;
+    let leftLegY = 15 * p;
     let rightLegX = 9 * p;
-    let rightLegY = 16 * p;
+    let rightLegY = 15 * p;
 
     if (isWalking) {
       if (walkAlt) {
@@ -159,17 +151,22 @@ export function drawPlayerSprite(
     }
 
     // Left Leg & Shoe
-    drawPixelRect(ctx, leftLegX, leftLegY, 2 * p, 4 * p, pantsColor);
-    drawPixelRect(ctx, leftLegX, leftLegY + 4 * p, 2 * p, 1 * p, skin); // Ankles
-    drawPixelRect(ctx, leftLegX, leftLegY + 5 * p, 2 * p, 1 * p, outline); // Shoes
+    drawPixelRect(ctx, leftLegX, leftLegY, 2 * p, 5 * p, pantsColor);
+    drawPixelRect(ctx, leftLegX, leftLegY + 5 * p, 2 * p, 1 * p, skin); // Ankles
+    drawPixelRect(ctx, leftLegX, leftLegY + 6 * p, 2 * p, 1 * p, outline); // Shoes
 
     // Right Leg & Shoe
-    drawPixelRect(ctx, rightLegX, rightLegY, 2 * p, 4 * p, pantsColor);
-    drawPixelRect(ctx, rightLegX, rightLegY + 4 * p, 2 * p, 1 * p, skin); // Ankles
-    drawPixelRect(ctx, rightLegX, rightLegY + 5 * p, 2 * p, 1 * p, outline); // Shoes
+    drawPixelRect(ctx, rightLegX, rightLegY, 2 * p, 5 * p, pantsColor);
+    drawPixelRect(ctx, rightLegX, rightLegY + 5 * p, 2 * p, 1 * p, skin); // Ankles
+    drawPixelRect(ctx, rightLegX, rightLegY + 6 * p, 2 * p, 1 * p, outline); // Shoes
 
-    // Pants Seam/Center Line
-    drawPixelRect(ctx, 7 * p, 16 * p, 2 * p, 4 * p, pantsShadow);
+    if (customization.gender === 'female') {
+      drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
+      drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
+    } else {
+      // Pants Seam/Center Line
+      drawPixelRect(ctx, 7 * p, 15 * p, 2 * p, 5 * p, pantsShadow);
+    }
 
   } else if (dir === 'up') {
     // === BACK VIEW (FACING UP - EXACTLY MATCHING IMAGE ROW 1) ===
@@ -177,8 +174,12 @@ export function drawPlayerSprite(
     // Full Back Hair Dome
     drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, outline);
     drawPixelRect(ctx, 3 * p, 1 * p, 10 * p, 7 * p, hair);
-    drawPixelRect(ctx, 2 * p, 2 * p, 12 * p, 5 * p, hair);
     
+    if (customization.gender === 'female') {
+      drawPixelRect(ctx, 2 * p, 4 * p, 2 * p, 7 * p, hair);
+      drawPixelRect(ctx, 12 * p, 4 * p, 2 * p, 7 * p, hair);
+    }
+
     // Ears on sides
     drawPixelRect(ctx, 2 * p, 5 * p, 1 * p, 2 * p, skin);
     drawPixelRect(ctx, 13 * p, 5 * p, 1 * p, 2 * p, skin);
@@ -208,13 +209,12 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 12 * p, 13 * p - armY, 1 * p, 3 * p, skin);
 
     // Shirt Outlines
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 5 * p, outline);
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 5 * p, outline);
-    drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 1 * p, outline);
+    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 4 * p, outline);
+    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 4 * p, outline);
 
     // Back Pants & Legs
-    let leftLegY = 16 * p;
-    let rightLegY = 16 * p;
+    let leftLegY = 15 * p;
+    let rightLegY = 15 * p;
 
     if (isWalking) {
       if (walkAlt) {
@@ -226,16 +226,21 @@ export function drawPlayerSprite(
       }
     }
 
-    drawPixelRect(ctx, 5 * p, leftLegY, 2 * p, 4 * p, pantsColor);
-    drawPixelRect(ctx, 5 * p, leftLegY + 4 * p, 2 * p, 1 * p, skin);
-    drawPixelRect(ctx, 5 * p, leftLegY + 5 * p, 2 * p, 1 * p, outline);
+    drawPixelRect(ctx, 5 * p, leftLegY, 2 * p, 5 * p, pantsColor);
+    drawPixelRect(ctx, 5 * p, leftLegY + 5 * p, 2 * p, 1 * p, skin);
+    drawPixelRect(ctx, 5 * p, leftLegY + 6 * p, 2 * p, 1 * p, outline);
 
-    drawPixelRect(ctx, 9 * p, rightLegY, 2 * p, 4 * p, pantsColor);
-    drawPixelRect(ctx, 9 * p, rightLegY + 4 * p, 2 * p, 1 * p, skin);
-    drawPixelRect(ctx, 9 * p, rightLegY + 5 * p, 2 * p, 1 * p, outline);
+    drawPixelRect(ctx, 9 * p, rightLegY, 2 * p, 5 * p, pantsColor);
+    drawPixelRect(ctx, 9 * p, rightLegY + 5 * p, 2 * p, 1 * p, skin);
+    drawPixelRect(ctx, 9 * p, rightLegY + 6 * p, 2 * p, 1 * p, outline);
 
-    // Pants Seam
-    drawPixelRect(ctx, 7 * p, 16 * p, 2 * p, 4 * p, pantsShadow);
+    if (customization.gender === 'female') {
+      drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
+      drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
+    } else {
+      // Pants Seam
+      drawPixelRect(ctx, 7 * p, 15 * p, 2 * p, 5 * p, pantsShadow);
+    }
 
   } else {
     // === SIDE VIEW (LEFT OR RIGHT) ===
@@ -253,6 +258,10 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 6 * p, 5 * p, 5 * p, 4 * p, skin); // Side face
     drawPixelRect(ctx, 5 * p, 5 * p, 1 * p, 2 * p, skin); // Side ear
     drawPixelRect(ctx, 7 * p, 3 * p, 5 * p, 2 * p, hair); // Side bang
+
+    if (customization.gender === 'female') {
+      drawPixelRect(ctx, 4 * p, 5 * p, 3 * p, 6 * p, hair);
+    }
 
     // Side Eye (1x2 pixel black eye)
     drawPixelRect(ctx, 9 * p, 5 * p, 1 * p, 2 * p, outline);
@@ -286,6 +295,11 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, leg2X, 15 * p, 2.5 * p, 5 * p, pantsColor);
     drawPixelRect(ctx, leg2X, 20 * p, 2.5 * p, 1 * p, skin);
     drawPixelRect(ctx, leg2X, 21 * p, 2.5 * p, 1 * p, outline);
+
+    if (customization.gender === 'female') {
+       drawPixelRect(ctx, 4.5 * p, 15 * p, 7 * p, 4 * p, pantsColor); // Skirt
+       drawPixelRect(ctx, 4.5 * p, 19 * p, 7 * p, 1 * p, pantsShadow); // Skirt shadow
+    }
 
     ctx.restore();
   }

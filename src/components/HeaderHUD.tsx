@@ -1,6 +1,6 @@
 import React from 'react';
 import { GameProgress, TeacherFoe } from '../types';
-import { Volume2, VolumeX, BookOpen, Palette, RotateCcw, LogOut } from 'lucide-react';
+import { Volume2, VolumeX, BookOpen, Palette, RotateCcw, LogOut, Maximize, Minimize } from 'lucide-react';
 import { audioEngine } from '../utils/AudioEngine';
 
 interface HeaderHUDProps {
@@ -34,6 +34,24 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
   const currentHp = typeof progress.hp === 'number' && progress.hp >= 0 ? progress.hp : maxHp;
   const hpPercent = Math.max(0, Math.min(100, (currentHp / maxHp) * 100));
   const foeHpPercent = activeFoe && maxFoeHp > 0 ? Math.max(0, Math.min(100, (foeHp / maxFoeHp) * 100)) : 0;
+
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+
+  React.useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => console.error('Error enabling full-screen mode:', err));
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   return (
     <header className="bg-zinc-950 border-b-4 border-white p-3 text-white font-mono flex flex-wrap items-center justify-between gap-3 select-none ">
@@ -90,8 +108,13 @@ export const HeaderHUD: React.FC<HeaderHUDProps> = ({
 
       {/* Header Action Buttons */}
       <div className="flex items-center gap-2">
-        
-        
+        <button
+          onClick={toggleFullscreen}
+          className="p-1.5 bg-zinc-900 border-2 border-zinc-600 hover:border-white hover:text-yellow-400 transition-colors rounded text-xs flex items-center gap-1 text-zinc-300 font-bold"
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+        </button>
         <button
           onClick={onToggleSound}
           className="p-1.5 bg-zinc-900 border-2 border-zinc-600 hover:border-white hover:text-yellow-400 transition-colors rounded text-xs flex items-center gap-1 text-zinc-300"

@@ -1149,24 +1149,29 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
         {/* Touch D-Pad Controls for Soul Dodge on Mobile */}
         {isDodging && (
-          <div className="mt-2 flex justify-between items-center touch-none select-none w-full max-w-[280px] mx-auto">
+          <div 
+            className="mt-2 flex justify-between items-center touch-none select-none w-full max-w-[280px] mx-auto"
+            onContextMenu={(e) => e.preventDefault()}
+          >
             {/* Left Side: Up/Down */}
             <div className="flex flex-col gap-2 shrink-0">
               <button
+                onContextMenu={(e) => e.preventDefault()}
                 onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowUp'] = true; }}
                 onPointerUp={() => keysPressedRef.current['ArrowUp'] = false}
                 onPointerLeave={() => keysPressedRef.current['ArrowUp'] = false}
                 onPointerCancel={() => keysPressedRef.current['ArrowUp'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
+                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
               >
                 <ArrowUp size={24} />
               </button>
               <button
+                onContextMenu={(e) => e.preventDefault()}
                 onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowDown'] = true; }}
                 onPointerUp={() => keysPressedRef.current['ArrowDown'] = false}
                 onPointerLeave={() => keysPressedRef.current['ArrowDown'] = false}
                 onPointerCancel={() => keysPressedRef.current['ArrowDown'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
+                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
               >
                 <ArrowDown size={24} />
               </button>
@@ -1179,20 +1184,22 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             {/* Right Side: Left/Right */}
             <div className="flex gap-2 shrink-0">
               <button
+                onContextMenu={(e) => e.preventDefault()}
                 onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowLeft'] = true; }}
                 onPointerUp={() => keysPressedRef.current['ArrowLeft'] = false}
                 onPointerLeave={() => keysPressedRef.current['ArrowLeft'] = false}
                 onPointerCancel={() => keysPressedRef.current['ArrowLeft'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
+                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
               >
                 <ArrowLeft size={24} />
               </button>
               <button
+                onContextMenu={(e) => e.preventDefault()}
                 onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowRight'] = true; }}
                 onPointerUp={() => keysPressedRef.current['ArrowRight'] = false}
                 onPointerLeave={() => keysPressedRef.current['ArrowRight'] = false}
                 onPointerCancel={() => keysPressedRef.current['ArrowRight'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors"
+                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
               >
                 <ArrowRight size={24} />
               </button>

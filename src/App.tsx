@@ -333,7 +333,7 @@ export default function App() {
                 onClick={handleNewSession}
                 className="w-full sm:w-3/4 py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-extrabold border-b-4 border-yellow-700 rounded text-xl sm:text-2xl flex items-center justify-center gap-2 transition-all shadow-md active:border-b-0 active:translate-y-1"
               >
-                <span>✨ MULAI SESI BARU</span>
+                <span>MULAI SESI BARU</span>
               </button>
 
               <button

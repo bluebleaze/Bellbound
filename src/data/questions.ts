@@ -6,6 +6,7 @@ export interface Question {
   a: string[];
   ok: number;
   explanation: string;
+  qType?: 'essay' | 'mcq';
 }
 
 // Generate PKN
@@ -135,8 +136,24 @@ const math: Question[] = [
   { id: 'm10', q: 'Jika f(x) = 2x + 3, maka nilai dari f(4) adalah?', a: ['11', '7', '12', '9'], ok: 0, explanation: 'Ganti x dengan 4: f(4) = 2(4) + 3 = 8 + 3 = 11.' },
 ];
 
+function shuffleQuestion(q: Question): Question {
+  if (q.qType === 'essay' || !q.a || q.a.length <= 1) return q;
+  const correctOption = q.a[q.ok];
+  const options = [...q.a];
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
+  }
+  return { ...q, a: options, ok: options.indexOf(correctOption) };
+}
+
 export const QUESTION_BANKS: Record<SubjectId, Question[]> = {
-  pkn, rpl, indo, inggris, bio, math
+  pkn: pkn.map(shuffleQuestion), 
+  rpl: rpl.map(shuffleQuestion), 
+  indo: indo.map(shuffleQuestion), 
+  inggris: inggris.map(shuffleQuestion), 
+  bio: bio.map(shuffleQuestion), 
+  math: math.map(shuffleQuestion)
 };
 
 export const FOES: Record<SubjectId, TeacherFoe> = {

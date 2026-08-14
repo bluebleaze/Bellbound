@@ -1286,10 +1286,10 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
           <button
             onClick={handleAct}
             disabled={isDodging}
-            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-green-400 hover:text-green-300 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+            className="relative group py-3 px-2 bg-green-950/50 border-2 border-green-700 hover:bg-green-900 hover:border-green-400 text-green-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
           >
-            <div className="flex items-center gap-1"><Heart size={16} /> <span>ITEM [3]</span></div>
-            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-green-200">({actUsesLeft}x Sisa)</span>
+            <div className="flex items-center gap-1"><Heart size={16} className="fill-green-500/20" /> <span>ITEM [3]</span></div>
+            <span className="text-[10px] font-normal text-green-500 group-hover:text-green-300">(Heal: {actUsesLeft}x)</span>
           </button>
           <button
             onClick={handleTalk}

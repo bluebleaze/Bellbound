@@ -62,7 +62,7 @@ export default function App() {
           customization: {
             ...INITIAL_PROGRESS.customization,
             ...(parsed.customization || {}),
-            uniform: parsed.customization?.uniform === 'sma' ? 'smk' : (parsed.customization?.uniform || 'smk'),
+            uniform: parsed.customization?.uniform === 'sma' ? 'smk' : (parsed.customization?.uniform || 'batik'),
           },
         };
       }

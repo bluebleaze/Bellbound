@@ -174,9 +174,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
               onChange={(e) => setForm({ ...form, uniform: e.target.value as any })}
               className="w-full bg-black border-2 border-zinc-700 text-white font-bold p-2 rounded outline-none focus:border-white"
             >
+              <option value="batik">Batik Sekolah</option>
               <option value="smk">Putih Abu-abu (SMK)</option>
               <option value="pramuka">Pramuka</option>
-              <option value="batik">Batik Sekolah</option>
               <option value="olahraga">Baju Olahraga</option>
             </select>
           </div>

@@ -1021,7 +1021,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
       if (subject === 'math') {
         setFoeHp(prev => prev + 1);
       }
-      setDialogue(`KURANG TEPAT! Jawaban benar: "${currentQ.a[currentQ.ok]}". Bersiaplah menghindar!`);
+      setDialogue(`KURANG TEPAT! Jawaban benar: "${currentQ.a[currentQ.ok]}". Gerakkan hati merah untuk MENGHINDAR!`);
       setTimeout(() => {
         setSelectedAnswerIdx(null);
         setAnswerStatus(null);
@@ -1102,12 +1102,37 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 
       {/* Soul Dodge Box (60FPS Canvas Undertale Arena) */}
       <div className="w-full bg-black border-x-8 border-amber-900 p-4 flex flex-col items-center justify-center relative">
-        <div className="flex items-center justify-between w-full max-w-[240px] mb-1 text-xs">
-          <span className="text-zinc-400 font-bold flex flex-col">
-            <span>{isDodging ? '[ FASE SERANGAN PELURU ]' : 'ARENA JIWA'}</span>
-            {isDodging && <span className="text-[10px] text-yellow-400 font-normal">Gunakan WASD / Panah / D-Pad untuk menghindari proyektil!</span>}
-          </span>
-          
+        <div className="flex flex-col items-center justify-center w-full max-w-md mb-2 text-center">
+          {isDodging ? (
+            <div className="w-full bg-zinc-900 border-2 border-yellow-400 rounded-xl px-3 py-2.5 shadow-lg">
+              <div className="flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-white">
+                <span>WAKTUNYA</span>
+                <span className="bg-yellow-400 text-black font-black px-2.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
+                  MENGHINDAR
+                </span>
+                <span>!</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2">
+                <span className="text-[11px] text-zinc-300 font-bold mr-1">KEYBOARD:</span>
+                {['W', 'A', 'S', 'D'].map((k) => (
+                  <kbd key={k} className="px-2 py-0.5 bg-yellow-400 text-black font-black text-xs rounded border-b-2 border-yellow-700 shadow">
+                    {k}
+                  </kbd>
+                ))}
+                <span className="text-[11px] text-zinc-400 mx-0.5">atau</span>
+                {['↑', '↓', '←', '→'].map((k) => (
+                  <kbd key={k} className="px-2 py-0.5 bg-yellow-400 text-black font-black text-xs rounded border-b-2 border-yellow-700 shadow">
+                    {k}
+                  </kbd>
+                ))}
+              </div>
+              <div className="text-[11px] sm:text-xs text-emerald-300 font-bold mt-1.5">
+                HP / MOUSE: Geser hati merah di kotak, atau tekan tombol panah di bawah!
+              </div>
+            </div>
+          ) : (
+            <span className="text-zinc-400 font-bold text-xs">ARENA JIWA</span>
+          )}
         </div>
 
         {/* POV Book and Pencil (only visible during showQuestions or dodge) */}
@@ -1135,14 +1160,35 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
         {/* Arena Canvas Frame */}
         <div
           className={`border-4 ${
-            isHitFlashing ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : 'border-white'
+            isHitFlashing ? 'border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : isDodging ? 'border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.35)]' : 'border-white'
           } relative shadow-inner`}
         >
           <canvas
             ref={arenaCanvasRef}
             width={240}
             height={120}
-            className="block bg-black"
+            onPointerDown={(e) => {
+              if (!isDodging) return;
+              const canvas = arenaCanvasRef.current;
+              if (!canvas) return;
+              const rect = canvas.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+              const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+              soulPosRef.current.x = Math.max(8, Math.min(canvas.width - 8, x));
+              soulPosRef.current.y = Math.max(8, Math.min(canvas.height - 8, y));
+            }}
+            onPointerMove={(e) => {
+              if (!isDodging) return;
+              if (e.pointerType === 'mouse' && e.buttons === 0) return;
+              const canvas = arenaCanvasRef.current;
+              if (!canvas) return;
+              const rect = canvas.getBoundingClientRect();
+              const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+              const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+              soulPosRef.current.x = Math.max(8, Math.min(canvas.width - 8, x));
+              soulPosRef.current.y = Math.max(8, Math.min(canvas.height - 8, y));
+            }}
+            className={`block bg-black touch-none ${isDodging ? 'cursor-crosshair' : ''}`}
             style={{ imageRendering: 'pixelated' }}
           />
         </div>
@@ -1166,62 +1212,63 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
           </div>
         </div>
 
-        {/* Touch D-Pad Controls for Soul Dodge on Mobile */}
+        {/* Touch D-Pad Controls for Soul Dodge on Mobile (Highlighted) */}
         {isDodging && (
           <div 
-            className="mt-2 flex justify-between items-center touch-none select-none w-full max-w-[280px] mx-auto"
+            className="mt-3 p-3 bg-zinc-900 border-2 border-yellow-400 rounded-xl shadow-[0_0_15px_rgba(250,204,21,0.25)] touch-none select-none w-full max-w-[320px] mx-auto"
             onContextMenu={(e) => e.preventDefault()}
           >
-            {/* Left Side: Up/Down */}
-            <div className="flex flex-col gap-2 shrink-0">
-              <button
-                onContextMenu={(e) => e.preventDefault()}
-                onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowUp'] = true; }}
-                onPointerUp={() => keysPressedRef.current['ArrowUp'] = false}
-                onPointerLeave={() => keysPressedRef.current['ArrowUp'] = false}
-                onPointerCancel={() => keysPressedRef.current['ArrowUp'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
-              >
-                <ArrowUp size={24} />
-              </button>
-              <button
-                onContextMenu={(e) => e.preventDefault()}
-                onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowDown'] = true; }}
-                onPointerUp={() => keysPressedRef.current['ArrowDown'] = false}
-                onPointerLeave={() => keysPressedRef.current['ArrowDown'] = false}
-                onPointerCancel={() => keysPressedRef.current['ArrowDown'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
-              >
-                <ArrowDown size={24} />
-              </button>
+            <div className="text-[11px] text-yellow-300 font-black text-center uppercase tracking-wider mb-2">
+              KONTROL SENTUH (TEKAN UNTUK MENGHINDAR)
             </div>
-            
-            <div className="text-[10px] text-zinc-400 font-bold text-center leading-tight mx-2 opacity-50 flex-1">
-               KONTROL JIWA
-            </div>
+            <div className="flex justify-between items-center w-full">
+              {/* Left Side: Up/Down */}
+              <div className="flex flex-col gap-2 shrink-0">
+                <button
+                  onContextMenu={(e) => e.preventDefault()}
+                  onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowUp'] = true; }}
+                  onPointerUp={() => keysPressedRef.current['ArrowUp'] = false}
+                  onPointerLeave={() => keysPressedRef.current['ArrowUp'] = false}
+                  onPointerCancel={() => keysPressedRef.current['ArrowUp'] = false}
+                  className="w-20 h-12 bg-yellow-500/20 active:bg-yellow-400 border-2 border-yellow-400 rounded-lg flex items-center justify-center gap-1 text-yellow-300 active:text-black font-bold text-xs transition-colors touch-none shadow"
+                >
+                  <ArrowUp size={20} /> <span>ATAS</span>
+                </button>
+                <button
+                  onContextMenu={(e) => e.preventDefault()}
+                  onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowDown'] = true; }}
+                  onPointerUp={() => keysPressedRef.current['ArrowDown'] = false}
+                  onPointerLeave={() => keysPressedRef.current['ArrowDown'] = false}
+                  onPointerCancel={() => keysPressedRef.current['ArrowDown'] = false}
+                  className="w-20 h-12 bg-yellow-500/20 active:bg-yellow-400 border-2 border-yellow-400 rounded-lg flex items-center justify-center gap-1 text-yellow-300 active:text-black font-bold text-xs transition-colors touch-none shadow"
+                >
+                  <ArrowDown size={20} /> <span>BAWAH</span>
+                </button>
+              </div>
 
-            {/* Right Side: Left/Right */}
-            <div className="flex gap-2 shrink-0">
-              <button
-                onContextMenu={(e) => e.preventDefault()}
-                onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowLeft'] = true; }}
-                onPointerUp={() => keysPressedRef.current['ArrowLeft'] = false}
-                onPointerLeave={() => keysPressedRef.current['ArrowLeft'] = false}
-                onPointerCancel={() => keysPressedRef.current['ArrowLeft'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
-              >
-                <ArrowLeft size={24} />
-              </button>
-              <button
-                onContextMenu={(e) => e.preventDefault()}
-                onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowRight'] = true; }}
-                onPointerUp={() => keysPressedRef.current['ArrowRight'] = false}
-                onPointerLeave={() => keysPressedRef.current['ArrowRight'] = false}
-                onPointerCancel={() => keysPressedRef.current['ArrowRight'] = false}
-                className="w-16 h-12 bg-zinc-800 active:bg-yellow-500 border border-zinc-500 rounded flex items-center justify-center text-zinc-300 active:text-black transition-colors touch-none"
-              >
-                <ArrowRight size={24} />
-              </button>
+              {/* Right Side: Left/Right */}
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onContextMenu={(e) => e.preventDefault()}
+                  onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowLeft'] = true; }}
+                  onPointerUp={() => keysPressedRef.current['ArrowLeft'] = false}
+                  onPointerLeave={() => keysPressedRef.current['ArrowLeft'] = false}
+                  onPointerCancel={() => keysPressedRef.current['ArrowLeft'] = false}
+                  className="w-20 h-12 bg-yellow-500/20 active:bg-yellow-400 border-2 border-yellow-400 rounded-lg flex items-center justify-center gap-1 text-yellow-300 active:text-black font-bold text-xs transition-colors touch-none shadow"
+                >
+                  <ArrowLeft size={20} /> <span>KIRI</span>
+                </button>
+                <button
+                  onContextMenu={(e) => e.preventDefault()}
+                  onPointerDown={(e) => { e.currentTarget.releasePointerCapture(e.pointerId); keysPressedRef.current['ArrowRight'] = true; }}
+                  onPointerUp={() => keysPressedRef.current['ArrowRight'] = false}
+                  onPointerLeave={() => keysPressedRef.current['ArrowRight'] = false}
+                  onPointerCancel={() => keysPressedRef.current['ArrowRight'] = false}
+                  className="w-20 h-12 bg-yellow-500/20 active:bg-yellow-400 border-2 border-yellow-400 rounded-lg flex items-center justify-center gap-1 text-yellow-300 active:text-black font-bold text-xs transition-colors touch-none shadow"
+                >
+                  <span>KANAN</span> <ArrowRight size={20} />
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1266,8 +1313,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                 </div>
               )}
               {answerStatus === 'wrong' && (
-                <div className="mb-3 p-2.5 bg-red-950 border border-red-500 text-red-200 rounded-lg font-bold text-center text-xs sm:text-sm shadow">
-                  <span>KURANG TEPAT — Jawaban benar: {currentQ.a[currentQ.ok]}</span>
+                <div className="mb-3 p-3 bg-red-950 border-2 border-red-500 text-red-100 rounded-xl font-bold text-center text-xs sm:text-sm shadow-lg space-y-2">
+                  <div>KURANG TEPAT — Jawaban benar: {currentQ.a[currentQ.ok]}</div>
+                  <div className="text-xs sm:text-sm text-yellow-200 flex flex-wrap items-center justify-center gap-1.5">
+                    <span>Bersiap</span>
+                    <span className="inline-block bg-yellow-400 text-black font-black px-2.5 py-0.5 rounded border border-yellow-200 uppercase tracking-wider animate-pulse">
+                      MENGHINDAR
+                    </span>
+                    <span>! Gerakkan hati pakai:</span>
+                    <kbd className="px-1.5 py-0.5 bg-yellow-400 text-black font-black text-xs rounded border-b-2 border-yellow-700">WASD</kbd>
+                    <span>/</span>
+                    <kbd className="px-1.5 py-0.5 bg-yellow-400 text-black font-black text-xs rounded border-b-2 border-yellow-700">Panah ↑↓←→</kbd>
+                    <span>/</span>
+                    <span className="px-1.5 py-0.5 bg-emerald-400 text-black font-black text-xs rounded">Geser Layar</span>
+                  </div>
                 </div>
               )}
 
@@ -1342,7 +1401,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             <div className="flex flex-col justify-between h-full gap-4">
               <p className="text-base sm:text-lg leading-relaxed text-zinc-100 flex items-start gap-3 bg-zinc-950 p-4 rounded-xl border border-zinc-700">
                 <span className="text-yellow-400 font-bold text-xs uppercase tracking-wider bg-zinc-900 border border-zinc-700 px-2 py-1 rounded shrink-0">GURU:</span>
-                <span>{dialogue}</span>
+                <span>
+                  {dialogue.split(/(MENGHINDAR)/g).map((part, i) =>
+                    part === 'MENGHINDAR' ? (
+                      <span
+                        key={i}
+                        className="inline-block bg-yellow-400 text-black font-black px-2 py-0.5 rounded mx-1 uppercase tracking-wider animate-pulse"
+                      >
+                        MENGHINDAR
+                      </span>
+                    ) : (
+                      part
+                    )
+                  )}
+                </span>
               </p>
               <button
                 onClick={handleThink}

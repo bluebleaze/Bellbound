@@ -1,5 +1,16 @@
 import { PlayerCustomization, SubjectId } from '../types';
 
+let schoolLogoImg: HTMLImageElement | null = null;
+let schoolLogoLoaded = false;
+
+if (typeof window !== 'undefined') {
+  schoolLogoImg = new Image();
+  schoolLogoImg.src = '/logo.png';
+  schoolLogoImg.onload = () => {
+    schoolLogoLoaded = true;
+  };
+}
+
 // Pixel Art Canvas Helper Utility
 
 export function drawPixelRect(
@@ -78,14 +89,12 @@ export function drawPlayerSprite(
     // === FRONT VIEW (FACE & FRONT UNIFORM WITH TIE) ===
     
     // Hair Base & Volume
-    drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, outline); // Hair top outline
+    drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, hair); // Hair top dome
     drawPixelRect(ctx, 3 * p, 1 * p, 10 * p, 4 * p, hair);   // Hair main dome
 
-    // Face Skin
+    // Face Skin & Ears (continuous width to prevent sub-pixel gaps at fractional scales)
+    drawPixelRect(ctx, 3 * p, 5 * p, 10 * p, 2 * p, skin);
     drawPixelRect(ctx, 4 * p, 5 * p, 8 * p, 4 * p, skin);
-    // Ears
-    drawPixelRect(ctx, 3 * p, 5 * p, 1 * p, 2 * p, skin);
-    drawPixelRect(ctx, 12 * p, 5 * p, 1 * p, 2 * p, skin);
 
     // Front Hair Bangs (Messy black bang locks)
     drawPixelRect(ctx, 3 * p, 2 * p, 10 * p, 2 * p, hair);
@@ -100,11 +109,6 @@ export function drawPlayerSprite(
     // Eyes (2x2 solid black pixel eyes matching image)
     drawPixelRect(ctx, 5 * p, 5 * p, 2 * p, 2 * p, outline);
     drawPixelRect(ctx, 9 * p, 5 * p, 2 * p, 2 * p, outline);
-
-    // Head Outline
-    drawPixelRect(ctx, 3 * p, 1 * p, 1 * p, 5 * p, outline); // Left hair edge
-    drawPixelRect(ctx, 12 * p, 1 * p, 1 * p, 5 * p, outline); // Right hair edge
-    drawPixelRect(ctx, 4 * p, 9 * p, 8 * p, 1 * p, outline); // Chin outline
 
     // Neck & White Collar
     drawPixelRect(ctx, 6 * p, 9 * p, 4 * p, 1 * p, skin);
@@ -128,6 +132,14 @@ export function drawPlayerSprite(
     // Dark Slate Blue Tie
     drawPixelRect(ctx, 7 * p, 10 * p, 2 * p, 4 * p, tieColor);
     drawPixelRect(ctx, 7.5 * p, 14 * p, 1 * p, 1 * p, tieColor);
+
+    // School Logo Cameo on Left Chest (All Uniforms)
+    if (schoolLogoLoaded && schoolLogoImg) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(schoolLogoImg, 9.2 * p, 11.2 * p, 2.5 * p, 2.5 * p);
+      ctx.restore();
+    }
 
     // Short Sleeves & Bare Arms
     drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 2 * p, sleeveColor); // Left sleeve
@@ -173,15 +185,15 @@ export function drawPlayerSprite(
       drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
       drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
     } else {
-      // Pants Seam/Center Line
-      drawPixelRect(ctx, 7 * p, 15 * p, 2 * p, 5 * p, pantsShadow);
+      // Pants Waistband / Hip connection (open gap between legs)
+      drawPixelRect(ctx, 5 * p, 15 * p, 6 * p, 1.8 * p, pantsColor);
     }
 
   } else if (dir === 'up') {
     // === BACK VIEW (FACING UP - EXACTLY MATCHING IMAGE ROW 1) ===
 
     // Full Back Hair Dome
-    drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, outline);
+    drawPixelRect(ctx, 4 * p, 0 * p, 8 * p, 1 * p, hair);
     drawPixelRect(ctx, 3 * p, 1 * p, 10 * p, 7 * p, hair);
     
     if (customization.gender === 'female') {
@@ -209,6 +221,14 @@ export function drawPlayerSprite(
        ctx.fillStyle = '#94a3b8'; // Grey dots
        ctx.fillRect(6 * p, 13 * p, 1 * p, 1 * p);
        ctx.fillRect(9 * p, 13 * p, 1 * p, 1 * p);
+    }
+
+    // School Logo Cameo on Upper Back (All Uniforms)
+    if (schoolLogoLoaded && schoolLogoImg) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(schoolLogoImg, 6.5 * p, 11.2 * p, 3 * p, 3 * p);
+      ctx.restore();
     }
 
     // Back Sleeves & Arms
@@ -251,8 +271,8 @@ export function drawPlayerSprite(
       drawPixelRect(ctx, 4 * p, 15 * p, 8 * p, 4 * p, pantsColor); // Skirt
       drawPixelRect(ctx, 4 * p, 19 * p, 8 * p, 1 * p, pantsShadow); // Skirt shadow
     } else {
-      // Pants Seam
-      drawPixelRect(ctx, 7 * p, 15 * p, 2 * p, 5 * p, pantsShadow);
+      // Pants Waistband / Hip connection (open gap between legs)
+      drawPixelRect(ctx, 5 * p, 15 * p, 6 * p, 1.8 * p, pantsColor);
     }
 
   } else {
@@ -298,6 +318,14 @@ export function drawPlayerSprite(
     const armSwing = isWalking ? (walkAlt ? -1 * p : 1 * p) : 0;
     drawPixelRect(ctx, 6 * p + armSwing, 11 * p, 2 * p, 2 * p, sleeveColor);
     drawPixelRect(ctx, 6 * p + armSwing, 13 * p, 2 * p, 3 * p, skin);
+
+    // School Logo Cameo on Sleeve (All Uniforms)
+    if (schoolLogoLoaded && schoolLogoImg) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(schoolLogoImg, 6.1 * p + armSwing, 11.1 * p, 1.8 * p, 1.8 * p);
+      ctx.restore();
+    }
 
     // Side Pants & Scissor Legs
     let leg1X = 5 * p;

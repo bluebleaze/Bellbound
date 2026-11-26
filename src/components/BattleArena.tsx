@@ -30,6 +30,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
 }) => {
   const foe = FOES[subject];
   const maxFoeHp = progress.difficulty === "extreme" ? 30 : progress.difficulty === "hard" ? 20 : 10;
+  const playerMaxHp = progress.maxHp > 0 ? progress.maxHp : 20;
+  const isLowHp = progress.hp <= playerMaxHp * 0.5;
   const [questions] = useState(() => {
     let base = [...QUESTION_BANKS[subject]];
     let required = progress.difficulty === 'extreme' ? 30 : progress.difficulty === 'hard' ? 20 : 10;
@@ -1039,7 +1041,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
       if (subject === 'math') {
         setFoeHp(prev => prev + 1);
       }
-      setDialogue(`KURANG TEPAT! Jawaban benar: "${currentQ.a[currentQ.ok]}". Gerakkan hati merah untuk MENGHINDAR!`);
+      setDialogue('KURANG TEPAT! Tetap fokus dan gerakkan hati merah untuk MENGHINDAR!');
       setTimeout(() => {
         setSelectedAnswerIdx(null);
         setAnswerStatus(null);
@@ -1358,7 +1360,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
               )}
               {answerStatus === 'wrong' && (
                 <div className="mb-3 p-3 bg-red-950 border-2 border-red-500 text-red-100 rounded-xl font-bold text-center text-xs sm:text-sm shadow-lg space-y-2">
-                  <div>KURANG TEPAT — Jawaban benar: {currentQ.a[currentQ.ok]}</div>
+                  <div>KURANG TEPAT — Tetap fokus, kunci jawaban tidak ditampilkan.</div>
                   <div className="text-xs sm:text-sm text-yellow-200 flex flex-wrap items-center justify-center gap-1.5">
                     <span>Bersiap</span>
                     <span className="inline-block bg-yellow-400 text-black font-black px-2.5 py-0.5 rounded border border-yellow-200 uppercase tracking-wider animate-pulse">
@@ -1400,17 +1402,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
                   {currentQ.a.map((option, idx) => {
                     const isSelected = selectedAnswerIdx === idx;
-                    const isCorrectOpt = idx === currentQ.ok;
                     let btnStyle = "bg-zinc-800 hover:bg-zinc-750 hover:border-yellow-400 border-zinc-600 text-zinc-100";
                     
                     if (answerStatus === 'correct' && isSelected) {
                       btnStyle = "bg-emerald-600 border-emerald-300 text-white ring-4 ring-emerald-400 font-black shadow-lg scale-[1.01]";
-                    } else if (answerStatus === 'wrong') {
-                      if (isSelected) {
-                        btnStyle = "bg-red-600 border-red-300 text-white ring-4 ring-red-400 font-black shadow-lg";
-                      } else if (isCorrectOpt) {
-                        btnStyle = "bg-emerald-900/90 border-emerald-400 text-emerald-100 ring-2 ring-emerald-400 font-bold";
-                      }
+                    } else if (answerStatus === 'wrong' && isSelected) {
+                      btnStyle = "bg-red-600 border-red-300 text-white ring-4 ring-red-400 font-black shadow-lg";
                     }
 
                     return (
@@ -1431,9 +1428,6 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                         )}
                         {answerStatus === 'wrong' && isSelected && (
                           <span className="text-xs bg-red-950 text-red-200 border border-red-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">Salah</span>
-                        )}
-                        {answerStatus === 'wrong' && isCorrectOpt && (
-                          <span className="text-[11px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500 shrink-0 font-normal">Kunci Jawaban</span>
                         )}
                       </button>
                     );
@@ -1476,10 +1470,24 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
           <button
             onClick={handleAct}
             disabled={isDodging || isAdvancing}
-            className="relative group py-3 px-2 bg-green-950/70 border-2 border-green-600 hover:bg-green-900 hover:border-green-400 text-green-300 disabled:opacity-40 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 rounded-xl transition-colors cursor-pointer"
+            className={`relative group py-3 px-2 border-2 disabled:opacity-40 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 rounded-xl transition-all cursor-pointer ${
+              isLowHp
+                ? 'bg-green-800 border-yellow-300 text-yellow-100 ring-4 ring-yellow-300/70 shadow-[0_0_22px_rgba(250,204,21,0.75)] animate-pulse'
+                : 'bg-green-950/70 border-green-600 hover:bg-green-900 hover:border-green-400 text-green-300'
+            }`}
           >
-            <div className="flex items-center gap-1.5"><Heart size={16} className="fill-green-500" /> <span>PULIHKAN DARAH (+3 HP)</span></div>
-            <span className="text-[10px] sm:text-xs font-normal text-green-400 group-hover:text-green-200">(Buku Catatan: {actUsesLeft}x tersisa)</span>
+            {isLowHp && (
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow-lg">
+                Darah Rendah!
+              </span>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Heart size={16} className={isLowHp ? 'fill-yellow-300 text-yellow-200' : 'fill-green-500'} />
+              <span>PULIHKAN DARAH (+3 HP)</span>
+            </div>
+            <span className={`text-[10px] sm:text-xs font-normal ${isLowHp ? 'text-yellow-200' : 'text-green-400 group-hover:text-green-200'}`}>
+              (Buku Catatan: {actUsesLeft}x tersisa)
+            </span>
           </button>
           <button
             onClick={handleTalk}

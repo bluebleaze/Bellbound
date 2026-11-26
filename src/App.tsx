@@ -14,6 +14,7 @@ import { ScheduleModal, CalendarModal } from './components/ScheduleModal';
 import { GameSidebar } from './components/GameSidebar';
 import { TutorialModal } from './components/TutorialModal';
 import { audioEngine } from './utils/AudioEngine';
+import { musicEngine, SUBJECT_MUSIC, type MusicTrack } from './utils/MusicEngine';
 import { Play, BookOpen, RotateCcw } from 'lucide-react';
 
 const INITIAL_PROGRESS: GameProgress = {
@@ -98,16 +99,54 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [progress.soundEnabled]);
 
+  // Music Engine Sync
   useEffect(() => {
-    // keeping the old effect's logic just in case
-    if (gameState === 'walk') {
-      audioEngine.start8BitBgm('overworld');
-    } else if (gameState === 'battle') {
-      audioEngine.start8BitBgm('battle');
-    } else {
-      audioEngine.stopBgm();
+    musicEngine.setEnabled(progress.soundEnabled);
+  }, [progress.soundEnabled]);
+
+  useEffect(() => {
+    musicEngine.setVolume(progress.bgmVolume);
+  }, [progress.bgmVolume]);
+
+  useEffect(() => {
+    let track: MusicTrack | null = null;
+
+    switch (gameState) {
+      case 'title':
+      case 'login':
+      case 'level_popup':
+      case 'intro':
+        track = 'mainmenu';
+        break;
+      case 'walk':
+      case 'class_intro':
+      case 'battle_intro':
+        // Masih di lorong / baru masuk kelas: pakai lagu lorong & kelas.
+        track = 'lorongdankelas';
+        break;
+      case 'battle':
+        // Sudah benar-benar battle dengan guru: pakai lagu mapel guru tersebut.
+        track = activeBattleSubject ? SUBJECT_MUSIC[activeBattleSubject] : 'lorongdankelas';
+        break;
+      case 'victory':
+        // Semua 6 mapel selesai: lagu ending. Victory biasa lanjut lagu mapel.
+        track = progress.completedSubjects.length >= 6
+          ? 'ending'
+          : activeBattleSubject
+            ? SUBJECT_MUSIC[activeBattleSubject]
+            : 'mainmenu';
+        break;
+      case 'game_over':
+        track = 'gameover';
+        break;
+      default:
+        track = 'mainmenu';
     }
-  }, [gameState, progress.soundEnabled]);
+
+    if (track) {
+      musicEngine.play(track);
+    }
+  }, [gameState, activeBattleSubject, progress.completedSubjects.length, progress.soundEnabled]);
 
   // Start / Continue Game
   const handleContinueGame = () => {
@@ -140,7 +179,7 @@ export default function App() {
     const next = !progress.soundEnabled;
     setProgress((prev) => ({ ...prev, soundEnabled: next }));
     audioEngine.enabled = next;
-    if (!next) audioEngine.stopBgm();
+    musicEngine.setEnabled(next);
   };
 
   // Reset Game
@@ -158,9 +197,15 @@ export default function App() {
   // Enter Battle
   const startActualBattle = () => {
     audioEngine.playHit();
+    if (activeBattleSubject) {
+      musicEngine.preload(SUBJECT_MUSIC[activeBattleSubject]);
+    }
+    musicEngine.preload('gameover');
+    if (progress.completedSubjects.length >= 5) {
+      musicEngine.preload('ending');
+    }
     setGameState("battle_intro");
     setTimeout(() => {
-      audioEngine.start8BitBgm('battle');
       setGameState("battle");
     }, 1200);
   };
@@ -169,6 +214,13 @@ export default function App() {
       audioEngine.playEncounter();
     } else {
       audioEngine.playSelect();
+    }
+
+    // Preload supaya transisi ke lagu battle / game over / ending mulus.
+    musicEngine.preload(SUBJECT_MUSIC[subject]);
+    musicEngine.preload('gameover');
+    if (progress.completedSubjects.length >= 5) {
+      musicEngine.preload('ending');
     }
     
     setActiveBattleSubject(subject);
@@ -193,6 +245,10 @@ export default function App() {
     const newCompleted = Array.from(new Set([...progress.completedSubjects, subject])) as SubjectId[];
     const newLv = 1 + newCompleted.length;
     const newMaxHp = 20 + (newCompleted.length * 3);
+
+    if (newCompleted.length >= 6) {
+      musicEngine.preload('ending');
+    }
 
     setProgress((prev) => ({
       ...prev,

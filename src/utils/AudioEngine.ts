@@ -3,10 +3,6 @@
 class AudioEngine {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
-  private bgmOsc: OscillatorNode | null = null;
-  private bgmGain: GainNode | null = null;
-  private isBgmPlaying: boolean = false;
-  private bgmInterval: number | null = null;
 
   private initCtx() {
     if (!this.ctx) {
@@ -251,54 +247,6 @@ class AudioEngine {
         elapsed += dur;
       });
     } catch {}
-  }
-
-  public start8BitBgm(mode: 'overworld' | 'battle') {
-    if (!this.enabled) return;
-    this.stopBgm();
-    this.initCtx();
-    if (!this.ctx) return;
-
-    this.isBgmPlaying = true;
-    let step = 0;
-
-    // Retro 8-bit bassline notes
-    const overworldScale = [130.81, 146.83, 164.81, 174.61, 196.00, 220.00]; // C, D, E, F, G, A
-    const battleScale = [110.00, 123.47, 130.81, 146.83, 164.81, 155.56]; // A, B, C, D, E, D#
-
-    const scale = mode === 'battle' ? battleScale : overworldScale;
-    const tempo = mode === 'battle' ? 180 : 260;
-
-    this.bgmInterval = window.setInterval(() => {
-      if (!this.enabled || !this.isBgmPlaying || !this.ctx) return;
-      try {
-        const freq = scale[step % scale.length];
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = mode === 'battle' ? 'sawtooth' : 'triangle';
-        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-
-        gain.gain.setValueAtTime(mode === 'battle' ? 0.04 : 0.025, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + (tempo / 1000));
-
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start();
-        osc.stop(this.ctx.currentTime + (tempo / 1000));
-
-        step++;
-      } catch {}
-    }, tempo);
-  }
-
-  public stopBgm() {
-    this.isBgmPlaying = false;
-    if (this.bgmInterval !== null) {
-      clearInterval(this.bgmInterval);
-      this.bgmInterval = null;
-    }
   }
 
   public playEncounter() {

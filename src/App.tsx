@@ -369,7 +369,7 @@ export default function App() {
                       <img 
                         src="/favicon.png" 
                         alt="O" 
-                        className="inline-block w-8 h-8 sm:w-12 sm:h-12 object-contain -mt-2 mx-1 drop-shadow-md" 
+                        className="inline-block w-11 h-11 sm:w-16 sm:h-16 object-contain align-middle -mt-1 sm:-mt-2 mx-1 drop-shadow-md" 
                         style={{ imageRendering: 'pixelated' }} 
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';

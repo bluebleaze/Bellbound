@@ -137,10 +137,6 @@ export function drawPlayerSprite(
     drawPixelRect(ctx, 3 * p, 13 * p + armY, 1 * p, 3 * p, skin); // Left arm
     drawPixelRect(ctx, 12 * p, 13 * p - armY, 1 * p, 3 * p, skin); // Right arm
 
-    // Shirt Outlines
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 4 * p, outline);
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 4 * p, outline);
-
     // Pants & Legs
     let leftLegX = 5 * p;
     let leftLegY = 15 * p;
@@ -222,10 +218,6 @@ export function drawPlayerSprite(
     const armY = isWalking ? (walkAlt ? -1 * p : 1 * p) : 0;
     drawPixelRect(ctx, 3 * p, 13 * p + armY, 1 * p, 3 * p, skin);
     drawPixelRect(ctx, 12 * p, 13 * p - armY, 1 * p, 3 * p, skin);
-
-    // Shirt Outlines
-    drawPixelRect(ctx, 3 * p, 11 * p, 1 * p, 4 * p, outline);
-    drawPixelRect(ctx, 12 * p, 11 * p, 1 * p, 4 * p, outline);
 
     // Back Pants & Legs
     let leftLegY = 15 * p;

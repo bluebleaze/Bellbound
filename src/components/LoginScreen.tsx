@@ -131,7 +131,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value.substring(0, 12) })}
               className="bg-transparent w-full text-white font-bold px-2 py-2 outline-none"
-              placeholder="Masukkan nama..."
+              placeholder="Masukkan nama (atau langsung Mulai)..."
               autoFocus
             />
           </div>
@@ -236,15 +236,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ customization, onSave,
         <div className="pt-6">
           <button
             onClick={() => { 
-              if (!form.name.trim()) {
-                setHighlightName(true);
-                setTimeout(() => setHighlightName(false), 1500);
-                return;
-              }
-              onSave(form); 
-              onStart(form, difficulty); 
+              const finalForm = {
+                ...form,
+                name: form.name.trim() || 'Tamu',
+              };
+              onSave(finalForm); 
+              onStart(finalForm, difficulty); 
             }}
-            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-extrabold border-b-4 border-yellow-700 rounded text-xl flex items-center justify-center gap-2 transition-all shadow-md active:border-b-0 active:translate-y-1"
+            className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-extrabold border-b-4 border-yellow-700 rounded text-xl flex items-center justify-center gap-2 transition-all shadow-md active:border-b-0 active:translate-y-1 cursor-pointer"
           >
             <span>MULAI PERJALANAN</span>
             <ArrowRight size={20} />

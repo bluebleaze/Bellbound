@@ -62,7 +62,10 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const [foeHp, setFoeHp] = useState(maxFoeHp);
   const [isDodging, setIsDodging] = useState(false);
   const [dialogue, setDialogue] = useState(`Selamat datang di ${foe.name}. Saatnya kerjakan ujian berikut!`);
-  const [showQuestions, setShowQuestions] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(true);
+  const [selectedAnswerIdx, setSelectedAnswerIdx] = useState<number | null>(null);
+  const [answerStatus, setAnswerStatus] = useState<'correct' | 'wrong' | null>(null);
+  const [isAdvancing, setIsAdvancing] = useState(false);
   const [hasUsedMercy, setHasUsedMercy] = useState(false);
   const [actUsesLeft, setActUsesLeft] = useState(progress.actUsesRemaining);
   const [questionTimer, setQuestionTimer] = useState(progress.difficulty === "extreme" ? 15 : progress.difficulty === "hard" ? 20 : 0);
@@ -227,10 +230,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             if (elapsed > duration && !shatterRef.current.active) {
               isDodgingRef.current = false;
               setIsDodging(false);
+              setShowQuestions(true); // Auto re-open questions for player
               bulletsRef.current = [];
               dodgeStartTime = 0;
               keysPressedRef.current = {}; // Fix for sticky touch inputs
-              setDialogue('Gelombang serangan selesai! Silakan jawab pertanyaan berikutnya.');
+              setDialogue('Gelombang serangan selesai! Mari lanjutkan mengerjakan soal berikutnya.');
             }
 
             if (shatterRef.current.active) {
@@ -585,7 +589,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             const nextBullets: ActiveBullet[] = [];
 
             bulletsRef.current.forEach((b) => {
-              const speedMod = isMathCorrectDodgeRef.current ? 0.35 : 0.7;
+              const baseSpeed = progress.difficulty === 'extreme' ? 1.0 : progress.difficulty === 'hard' ? 0.75 : 0.48;
+              const speedMod = isMathCorrectDodgeRef.current ? 0.28 : baseSpeed;
               b.x += b.vx * speedMod;
               b.y += b.vy * speedMod;
 
@@ -598,7 +603,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                   lastHitTimeRef.current = Date.now();
                   audioEngine.playHit();
 
-                  const damage = 4;
+                  const damage = progress.difficulty === 'extreme' ? 5 : progress.difficulty === 'hard' ? 4 : 2;
                   setHintBonus(false);
 
                   const nextHp = Math.max(0, currentHpRef.current - damage);
@@ -696,7 +701,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
             ctx.font = 'bold 10px monospace';
             ctx.textAlign = 'right';
             ctx.textBaseline = 'top';
-            ctx.fillText(`⏱️ ${secLeft}s`, canvas.width - 4, 7);
+            ctx.fillText(`${secLeft}s`, canvas.width - 4, 7);
             ctx.restore();
 
             // DRAW TP (GRAZE) BAR
@@ -955,9 +960,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   };
 
   const handleAnswer = (answerIdx: number | string) => {
-    setShowQuestions(false);
+    if (isAdvancing || isDodging) return;
     const currentQ = questions[qIndex % questions.length];
-    setTotalQuestionsAnswered(prev => prev + 1);
+    const numIdx = typeof answerIdx === 'number' ? answerIdx : -1;
+    setSelectedAnswerIdx(numIdx);
+    setIsAdvancing(true);
 
     let isCorrect = false;
     if (typeof answerIdx === 'number') {
@@ -968,50 +975,62 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
     }
 
     if (isCorrect) {
+      setAnswerStatus('correct');
       setCorrectAnswers(prev => prev + 1);
+      setTotalQuestionsAnswered(prev => prev + 1);
       audioEngine.playCorrect();
       
-      if (subject === 'math') {
-        const nextFoeHp = foeHp - 1;
-        setFoeHp(nextFoeHp);
-        if (nextFoeHp <= 0) {
-          audioEngine.playVictory();
-          setDialogue(`LULUS! ${foe.label} tersenyum bangga dan memberikan sertifikat kelulusan pelajaran!`);
-          setTimeout(() => onVictory(subject, { 
-    correct: (correctAnswers + 1) * (progress.difficulty === 'extreme' ? 2.3 : progress.difficulty === 'hard' ? 1.5 : 1), 
-    total: totalQuestionsAnswered + 1 
-  }), 1200);
-        } else {
+      const nextFoeHp = foeHp - 1;
+      setFoeHp(nextFoeHp);
+
+      if (nextFoeHp <= 0) {
+        audioEngine.playVictory();
+        setDialogue(`LULUS! ${foe.label} tersenyum bangga: "Hebat sekali! Semua ujian berhasil diselesaikan!"`);
+        setTimeout(() => onVictory(subject, { 
+          correct: (correctAnswers + 1) * (progress.difficulty === 'extreme' ? 2.3 : progress.difficulty === 'hard' ? 1.5 : 1), 
+          total: totalQuestionsAnswered + 1 
+        }), 1200);
+      } else if (subject === 'math') {
+        setDialogue(`BENAR! Luar biasa! Bersiap hadapi ujian geometri!`);
+        setTimeout(() => {
           setQIndex(prev => prev + 1);
+          setSelectedAnswerIdx(null);
+          setAnswerStatus(null);
+          setIsAdvancing(false);
+          setShowQuestions(false);
           centerSoul();
           setIsMathCorrectDodge(true);
           setIsDodging(true);
-          setDialogue(`BENAR! Tapi Geometri tidak semudah itu! Bertahanlah!`);
-        }
+        }, 1000);
       } else {
-        const nextFoeHp = foeHp - 1;
-        setFoeHp(nextFoeHp);
-        if (nextFoeHp <= 0) {
-          audioEngine.playVictory();
-          setDialogue(`LULUS! ${foe.label} tersenyum bangga dan memberikan sertifikat kelulusan pelajaran!`);
-          setTimeout(() => onVictory(subject, { 
-    correct: (correctAnswers + 1) * (progress.difficulty === 'extreme' ? 2.3 : progress.difficulty === 'hard' ? 1.5 : 1), 
-    total: totalQuestionsAnswered + 1 
-  }), 1200);
-        } else {
+        // AUTOMATIC AUTO-ADVANCE TO NEXT QUESTION FOR ALL SUBJECTS!
+        setDialogue(`BENAR! ${currentQ.explanation || 'Jawaban Anda sangat tepat!'}`);
+        setTimeout(() => {
           setQIndex(prev => prev + 1);
-          setDialogue(`BENAR! ${currentQ.explanation || 'Jawabanmu tepat!'}`);
-        }
+          setSelectedAnswerIdx(null);
+          setAnswerStatus(null);
+          setEssayAnswer("");
+          setShowQuestions(true); // Keep questions active for seamless auto next
+          setIsAdvancing(false);
+        }, 1000);
       }
     } else {
+      setAnswerStatus('wrong');
+      setTotalQuestionsAnswered(prev => prev + 1);
       audioEngine.playWrong();
       if (subject === 'math') {
         setFoeHp(prev => prev + 1);
       }
-      centerSoul();
-      setIsMathCorrectDodge(false);
-      setIsDodging(true);
-      setDialogue(`KURANG TEPAT! ${foe.label} melancarkan serangan peluru! Gunakan WASD / Panah / Touch untuk menghindar!`);
+      setDialogue(`KURANG TEPAT! Jawaban benar: "${currentQ.a[currentQ.ok]}". Bersiaplah menghindar!`);
+      setTimeout(() => {
+        setSelectedAnswerIdx(null);
+        setAnswerStatus(null);
+        setIsAdvancing(false);
+        setShowQuestions(false);
+        centerSoul();
+        setIsMathCorrectDodge(false);
+        setIsDodging(true);
+      }, 1500);
     }
   };
 
@@ -1085,8 +1104,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
       <div className="w-full bg-black border-x-8 border-amber-900 p-4 flex flex-col items-center justify-center relative">
         <div className="flex items-center justify-between w-full max-w-[240px] mb-1 text-xs">
           <span className="text-zinc-400 font-bold flex flex-col">
-            <span>{isDodging ? '⚠️ SERANGAN PELURU AKTIF!' : 'ARENA JIWA ♥'}</span>
-            {isDodging && <span className="text-[10px] text-yellow-400 font-normal">Gunakan WASD (Atas/Bawah/Kiri/Kanan) / Panah / D-Pad untuk menghindari!</span>}
+            <span>{isDodging ? '[ FASE SERANGAN PELURU ]' : 'ARENA JIWA'}</span>
+            {isDodging && <span className="text-[10px] text-yellow-400 font-normal">Gunakan WASD / Panah / D-Pad untuk menghindari proyektil!</span>}
           </span>
           
         </div>
@@ -1211,18 +1230,52 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
       {/* Container for Dialogue and Actions with transition animation */}
       <div key={isDodging ? 'dodge' : 'action'} className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-2 duration-300">
         {/* Dialogue / Multiple Choice Answers Container */}
-        <div className="w-full bg-zinc-900 border-x-8 border-t-4 border-amber-900 p-4 min-h-[110px]">
+        <div className="w-full bg-zinc-900 border-x-8 border-t-4 border-amber-900 p-4 sm:p-5 min-h-[140px]">
           {showQuestions ? (
             <div className="flex flex-col h-full overflow-y-auto pr-2 relative">
               {progress.difficulty !== 'normal' && (
-                <div className="absolute top-0 right-0 text-red-500 font-bold text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] animate-pulse">
-                  ⏳ {questionTimer}s
+                <div className="absolute top-0 right-0 text-red-500 font-bold text-sm tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,1)] animate-pulse">
+                  WAKTU: {questionTimer}s
                 </div>
               )}
-              <span className="text-yellow-400 font-bold text-xs mb-1">SOAL {qIndex % questions.length + 1} / {questions.length} - {currentQ.qType === 'essay' ? 'ESAI' : 'PILIHAN GANDA'}</span>
-              <span className="text-zinc-300 font-bold text-sm mb-4 leading-relaxed pr-10">
+              {/* Question Progress Header */}
+              <div className="flex items-center justify-between border-b border-zinc-700 pb-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-yellow-400 text-black text-xs font-black px-2.5 py-1 rounded uppercase tracking-wider shadow">
+                    SOAL {qIndex % questions.length + 1} / {questions.length}
+                  </span>
+                  <span className="text-zinc-400 text-xs font-semibold">
+                    {currentQ.qType === 'essay' ? 'ESAI' : 'PILIHAN GANDA'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-400 text-xs font-bold">Benar: {correctAnswers}</span>
+                  <div className="w-20 sm:w-28 h-2.5 bg-zinc-800 rounded-full overflow-hidden border border-zinc-600">
+                    <div 
+                      className="h-full bg-emerald-400 transition-all duration-300"
+                      style={{ width: `${Math.min(100, (((qIndex % questions.length) + (answerStatus === 'correct' ? 1 : 0)) / questions.length) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Feedback Alert on Answer */}
+              {answerStatus === 'correct' && (
+                <div className="mb-3 p-2.5 bg-emerald-950 border border-emerald-500 text-emerald-200 rounded-lg font-bold text-center text-xs sm:text-sm shadow">
+                  <span>BENAR — Melanjutkan ke soal berikutnya...</span>
+                </div>
+              )}
+              {answerStatus === 'wrong' && (
+                <div className="mb-3 p-2.5 bg-red-950 border border-red-500 text-red-200 rounded-lg font-bold text-center text-xs sm:text-sm shadow">
+                  <span>KURANG TEPAT — Jawaban benar: {currentQ.a[currentQ.ok]}</span>
+                </div>
+              )}
+
+              {/* Question Text */}
+              <h4 className="text-white font-bold text-base sm:text-lg mb-4 leading-relaxed">
                 {currentQ.q}
-              </span>
+              </h4>
+
               {currentQ.qType === 'essay' ? (
                 <div className="flex flex-col gap-2 mt-auto">
                   <input 
@@ -1230,74 +1283,103 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
                     value={essayAnswer}
                     onChange={(e) => setEssayAnswer(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAnswer(essayAnswer); }}
-                    placeholder="Ketik jawaban (singkat)..."
-                    className="p-3 bg-zinc-900 border-2 border-zinc-600 focus:border-yellow-400 text-white font-bold rounded outline-none w-full"
+                    placeholder="Ketik jawaban singkat di sini..."
+                    className="p-3 bg-zinc-900 border-2 border-zinc-600 focus:border-yellow-400 text-white font-bold rounded-xl outline-none w-full text-base"
                     autoFocus
                   />
                   <button 
                     onClick={() => handleAnswer(essayAnswer)}
-                    className="bg-yellow-600 hover:bg-yellow-500 text-black font-bold p-2 rounded"
+                    disabled={isAdvancing}
+                    className="bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold p-3 rounded-xl transition-all shadow"
                   >SUBMIT JAWABAN</button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-auto">
-                  {currentQ.a.map((option, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleAnswer(idx)}
-                      className="p-2.5 bg-zinc-900 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-300 text-left font-bold text-xs rounded transition-colors"
-                    >
-                      <span className="text-yellow-400 mr-2">[{idx + 1} atau {String.fromCharCode(65 + idx)}]</span>
-                      {option}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
+                  {currentQ.a.map((option, idx) => {
+                    const isSelected = selectedAnswerIdx === idx;
+                    const isCorrectOpt = idx === currentQ.ok;
+                    let btnStyle = "bg-zinc-800 hover:bg-zinc-750 hover:border-yellow-400 border-zinc-600 text-zinc-100";
+                    
+                    if (answerStatus === 'correct' && isSelected) {
+                      btnStyle = "bg-emerald-600 border-emerald-300 text-white ring-4 ring-emerald-400 font-black shadow-lg scale-[1.01]";
+                    } else if (answerStatus === 'wrong') {
+                      if (isSelected) {
+                        btnStyle = "bg-red-600 border-red-300 text-white ring-4 ring-red-400 font-black shadow-lg";
+                      } else if (isCorrectOpt) {
+                        btnStyle = "bg-emerald-900/90 border-emerald-400 text-emerald-100 ring-2 ring-emerald-400 font-bold";
+                      }
+                    }
+
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleAnswer(idx)}
+                        disabled={isAdvancing || isDodging}
+                        className={`p-3 sm:p-4 border-2 rounded-xl text-left font-bold text-sm sm:text-base flex items-center justify-between transition-all ${btnStyle} active:scale-98 cursor-pointer`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-yellow-400 text-black font-black text-sm flex items-center justify-center shrink-0 shadow">
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <span className="leading-snug">{option}</span>
+                        </div>
+                        {answerStatus === 'correct' && isSelected && (
+                          <span className="text-xs bg-emerald-950 text-emerald-200 border border-emerald-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">Benar</span>
+                        )}
+                        {answerStatus === 'wrong' && isSelected && (
+                          <span className="text-xs bg-red-950 text-red-200 border border-red-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider shrink-0">Salah</span>
+                        )}
+                        {answerStatus === 'wrong' && isCorrectOpt && (
+                          <span className="text-[11px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500 shrink-0 font-normal">Kunci Jawaban</span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-sm leading-relaxed text-zinc-200 flex items-start gap-2">
-              <span className="text-yellow-400 font-bold">💬</span>
-              <span>{dialogue}</span>
-            </p>
+            <div className="flex flex-col justify-between h-full gap-4">
+              <p className="text-base sm:text-lg leading-relaxed text-zinc-100 flex items-start gap-3 bg-zinc-950 p-4 rounded-xl border border-zinc-700">
+                <span className="text-yellow-400 font-bold text-xs uppercase tracking-wider bg-zinc-900 border border-zinc-700 px-2 py-1 rounded shrink-0">GURU:</span>
+                <span>{dialogue}</span>
+              </p>
+              <button
+                onClick={handleThink}
+                disabled={isDodging}
+                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40 text-black font-black text-lg sm:text-xl rounded-xl border-4 border-yellow-200 shadow-xl active:scale-98 transition-transform flex items-center justify-center gap-2 animate-bounce cursor-pointer"
+              >
+                <Brain size={24} /> <span>KEMBALI KE SOAL UJIAN (KLIK DI SINI)</span>
+              </button>
+            </div>
           )}
         </div>
 
-        {/* BIG FIGHT BUTTON (Separated) */}
-        <div className="w-full bg-zinc-900 border-x-8 border-amber-900 p-3 flex justify-center">
-          <button
-            onClick={handleThink}
-            disabled={isDodging}
-            className="w-full sm:w-2/3 py-4 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 disabled:opacity-40 text-black font-extrabold text-lg sm:text-xl rounded-xl border-4 border-yellow-200 shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
-          >
-            <Brain size={24} /> <span>JAWAB SOAL (FIGHT) [1]</span>
-          </button>
-        </div>
-
-        {/* Other Command Action Bar */}
+        {/* Command Action Bar */}
         <div className="w-full bg-zinc-900 border-x-8 border-b-8 border-amber-900 p-3 grid grid-cols-3 gap-2 rounded-b">
           <button
-            onClick={handleObserve}
-            disabled={isDodging}
-            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
-          >
-            <div className="flex items-center gap-1"><Eye size={16} /> <span>CEK [2]</span></div>
-            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Info Lawan)</span>
-          </button>
-          <button
             onClick={handleAct}
-            disabled={isDodging}
-            className="relative group py-3 px-2 bg-green-950/50 border-2 border-green-700 hover:bg-green-900 hover:border-green-400 text-green-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+            disabled={isDodging || isAdvancing}
+            className="relative group py-3 px-2 bg-green-950/70 border-2 border-green-600 hover:bg-green-900 hover:border-green-400 text-green-300 disabled:opacity-40 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 rounded-xl transition-colors cursor-pointer"
           >
-            <div className="flex items-center gap-1"><Heart size={16} className="fill-green-500/20" /> <span>ITEM [3]</span></div>
-            <span className="text-[10px] font-normal text-green-500 group-hover:text-green-300">(Heal: {actUsesLeft}x)</span>
+            <div className="flex items-center gap-1.5"><Heart size={16} className="fill-green-500" /> <span>PULIHKAN DARAH (+3 HP)</span></div>
+            <span className="text-[10px] sm:text-xs font-normal text-green-400 group-hover:text-green-200">(Buku Catatan: {actUsesLeft}x tersisa)</span>
           </button>
           <button
             onClick={handleTalk}
-            disabled={isDodging}
-            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs flex flex-col items-center justify-center gap-1 rounded transition-colors"
+            disabled={isDodging || isAdvancing}
+            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 rounded-xl transition-colors cursor-pointer"
           >
-            <div className="flex items-center gap-1"><MessageSquare size={16} /> <span>MERCY [4]</span></div>
-            <span className="text-[10px] font-normal text-zinc-400 group-hover:text-yellow-200">(Diskusi)</span>
+            <div className="flex items-center gap-1.5"><MessageSquare size={16} /> <span>PETUNJUK GURU</span></div>
+            <span className="text-[10px] sm:text-xs font-normal text-zinc-400 group-hover:text-yellow-200">(Diskusi / Clue)</span>
+          </button>
+          <button
+            onClick={handleObserve}
+            disabled={isDodging || isAdvancing}
+            className="relative group py-3 px-2 bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 hover:text-yellow-400 disabled:opacity-40 font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 rounded-xl transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-1.5"><Eye size={16} /> <span>INFO UJIAN</span></div>
+            <span className="text-[10px] sm:text-xs font-normal text-zinc-400 group-hover:text-yellow-200">(Cek Kisi-kisi)</span>
           </button>
         </div>
       </div>

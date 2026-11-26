@@ -109,7 +109,7 @@ export const CustomizerModal: React.FC<CustomizerModalProps> = ({ customization,
         </button>
 
         <h2 className="text-xl font-bold text-yellow-400 mb-4 border-b-2 border-zinc-700 pb-2 flex items-center gap-2">
-          <span>🎨</span> KUSTOMISASI KARAKTER SISWA
+          KUSTOMISASI KARAKTER SISWA
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">

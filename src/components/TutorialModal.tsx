@@ -11,32 +11,32 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
     {
       title: 'SELAMAT DATANG DI BELLBOUND!',
       content: 'Di game ini, kamu harus bertahan dari Ujian Nasional dengan cara menghindari serangan "peluru" pelajaran dari guru-guru dan menjawab soal dengan tepat.',
-      icon: '🏫'
+      icon: '01'
     },
     {
       title: 'EKSPLORASI (OVERWORLD)',
       content: 'Gunakan tombol W, A, S, D atau Panah (Arrow Keys) untuk menggerakan karaktermu. Kamu juga bisa menggunakan tombol sentuh (D-Pad) di layar jika main di HP. Untuk menantang guru, hampiri mereka atau masuk ke kelas dan tekan SPASI/ENTER.',
-      icon: '🚶'
+      icon: '02'
     },
     {
       title: 'PERTARUNGAN (BATTLE)',
       content: 'Terdapat 2 fase: Fase Menjawab dan Fase Menghindar. Di fase menjawab, pilihlah aksi [FIGHT] untuk menjawab soal, [CEK] untuk melihat kelemahan, [ITEM] untuk heal, atau [MERCY] untuk obrolan santai.',
-      icon: '⚔️'
+      icon: '03'
     },
     {
       title: 'ARENA JIWA (MENGHINDAR)',
       content: 'Setelah menjawab, guru akan menyerang! Gunakan WASD/Panah untuk menggerakan Hati (Soul) dan hindari proyektil selama waktu belum habis!',
-      icon: '♥️'
+      icon: '04'
     },
     {
       title: 'GRAZE & TP BAR',
       content: 'Jika kamu berhasil menghindar sangat tipis (menyerempet peluru tanpa terkena damage), kamu akan mendapatkan efek GRAZE dan mengisi TP Bar di pojok kiri atas. Kumpulkan 5 TP untuk memulihkan 1 kuota aksi [ITEM] (Heal)!',
-      icon: '⚡'
+      icon: '05'
     },
     {
       title: 'TIPS PENTING!',
       content: 'Gunakan shortcut angka [1], [2], [3], [4] di keyboard untuk memilih aksi atau jawaban lebih cepat. Jangan lupa perhatikan nyawamu (HP). Selamat berjuang!',
-      icon: '💡'
+      icon: '06'
     }
   ];
 
@@ -60,9 +60,9 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
         
         <div className="flex justify-between items-start mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-yellow-400">
-            TUTORIAL {step + 1}/{steps.length}
+            PANDUAN {step + 1}/{steps.length}
           </h2>
-          <span className="text-4xl">{steps[step].icon}</span>
+          <span className="text-xs font-black bg-zinc-800 border border-zinc-600 px-2.5 py-1 rounded text-yellow-400 tracking-wider">MODUL {steps[step].icon}</span>
         </div>
 
         <h3 className="text-lg font-bold mb-3 border-b-2 border-zinc-700 pb-2 text-zinc-200">
@@ -73,20 +73,28 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ onClose }) => {
           {steps[step].content}
         </p>
 
-        <div className="flex justify-between gap-4">
+        <div className="flex flex-col sm:flex-row justify-between gap-3">
           <button
-            onClick={handlePrev}
-            disabled={step === 0}
-            className="px-4 py-2 bg-zinc-700 disabled:opacity-30 hover:bg-zinc-600 font-bold rounded transition-colors"
+            onClick={onClose}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-yellow-400 border border-zinc-700 text-xs sm:text-sm font-bold rounded-lg transition-colors cursor-pointer"
           >
-            SEBELUMNYA
+            LEWATI (LANGSUNG MAIN)
           </button>
-          <button
-            onClick={handleNext}
-            className="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-black font-bold rounded transition-colors"
-          >
-            {step === steps.length - 1 ? 'MULAI MAIN!' : 'LANJUT'}
-          </button>
+          <div className="flex gap-2 flex-1 justify-end">
+            <button
+              onClick={handlePrev}
+              disabled={step === 0}
+              className="px-4 py-2 bg-zinc-700 disabled:opacity-30 hover:bg-zinc-600 font-bold rounded-lg transition-colors cursor-pointer text-xs sm:text-sm"
+            >
+              SEBELUMNYA
+            </button>
+            <button
+              onClick={handleNext}
+              className="px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold rounded-lg transition-colors cursor-pointer text-xs sm:text-sm shadow"
+            >
+              {step === steps.length - 1 ? 'MULAI MAIN!' : 'LANJUT'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

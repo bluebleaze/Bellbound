@@ -17,7 +17,7 @@ export const DevMenuModal: React.FC<DevMenuModalProps> = ({ progress, setProgres
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="bg-zinc-900 border-4 border-purple-500 rounded p-6 max-w-sm w-full space-y-4">
-        <h2 className="text-xl font-bold text-purple-400 border-b-2 border-purple-800 pb-2">🛠️ DEV MENU</h2>
+        <h2 className="text-xl font-bold text-purple-400 border-b-2 border-purple-800 pb-2">DEV MENU</h2>
         
         <div className="space-y-2">
           {currentStage && (

@@ -14,7 +14,7 @@ import { ScheduleModal, CalendarModal } from './components/ScheduleModal';
 import { GameSidebar } from './components/GameSidebar';
 import { TutorialModal } from './components/TutorialModal';
 import { audioEngine } from './utils/AudioEngine';
-import { Play, Sparkles, BookOpen, RotateCcw } from 'lucide-react';
+import { Play, BookOpen, RotateCcw } from 'lucide-react';
 
 const INITIAL_PROGRESS: GameProgress = {
   hp: 20,
@@ -26,7 +26,7 @@ const INITIAL_PROGRESS: GameProgress = {
   difficulty: 'normal',
   customization: {
     name: '',
-    uniform: 'smk',
+    uniform: 'batik',
     hairColor: '#451a03',
     skinColor: '#e0ac69',
     gender: 'male',
@@ -356,7 +356,7 @@ export default function App() {
                   onClick={() => setIsCustomizerOpen(true)}
                   className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-400 rounded transition-colors"
                 >
-                  🎨 KUSTOM KARAKTER
+                  KUSTOMISASI KARAKTER
                 </button>
               </div>
             </div>

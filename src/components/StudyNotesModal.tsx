@@ -84,7 +84,7 @@ export const StudyNotesModal: React.FC<StudyNotesModalProps> = ({ completedSubje
               </div>
 
               <div className="bg-zinc-950 p-3 border border-yellow-500/30 rounded mt-4">
-                <span className="text-xs font-bold text-yellow-400 block mb-1">💡 TIPS BELAJAR GURU:</span>
+                <span className="text-xs font-bold text-yellow-400 block mb-1">CATATAN BELAJAR GURU:</span>
                 <p className="text-xs text-zinc-300 italic">{currentNote.tips}</p>
               </div>
             </>

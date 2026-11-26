@@ -10,6 +10,7 @@ import { LoginScreen } from './components/LoginScreen';
 import { LevelPopupModal } from './components/LevelPopupModal';
 import { StudyNotesModal } from './components/StudyNotesModal';
 import { VictoryModal } from './components/VictoryModal';
+import { EndingModal } from './components/EndingModal';
 import { ScheduleModal, CalendarModal } from './components/ScheduleModal';
 import { GameSidebar } from './components/GameSidebar';
 import { TutorialModal } from './components/TutorialModal';
@@ -593,30 +594,22 @@ export default function App() {
       )}
 
       {gameState === 'victory' && victorySubject && (
-        <VictoryModal
-          progress={progress}
-          completedSubject={victorySubject}
-          totalCompleted={progress.completedSubjects.length}
-          onContinue={() => {
-            const isFinalGameVictory = progress.completedSubjects.length >= 6;
-            let totalAvg = 0;
-            if (isFinalGameVictory) {
-              let sum = 0;
-              for (const sub of Object.values(progress.scores || {}) as {correct: number, total: number}[]) {
-                sum += (sub.correct / sub.total) * 100;
-              }
-              totalAvg = Math.round(sum / 6);
-            }
-
-            if (isFinalGameVictory && totalAvg < 70) {
-              // Remedial (restart)
-              handleResetGame();
-            } else {
+        progress.completedSubjects.length >= 6 ? (
+          <EndingModal
+            progress={progress}
+            onReset={handleResetGame}
+          />
+        ) : (
+          <VictoryModal
+            progress={progress}
+            completedSubject={victorySubject}
+            totalCompleted={progress.completedSubjects.length}
+            onContinue={() => {
               setGameState('walk');
               setCurrentRoom('hall');
-            }
-          }}
-        />
+            }}
+          />
+        )
       )}
       
       {isDevMenuOpen && (

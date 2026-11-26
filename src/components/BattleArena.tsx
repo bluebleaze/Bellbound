@@ -5,6 +5,12 @@ import { drawTeacherSprite } from './PixelSprites';
 import { audioEngine } from '../utils/AudioEngine';
 import { Eye, MessageSquare, Heart, Brain, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, ShieldAlert } from 'lucide-react';
 
+// Jeda penguncian input jawaban A/D. Dipakai saat battle baru dimulai dan
+// sesaat setelah fase dodge, supaya tombol WASD yang masih ditahan tidak
+// otomatis memilih jawaban.
+const BATTLE_START_ANSWER_LOCK_MS = 2000;
+const DODGE_END_ANSWER_LOCK_MS = 1200;
+
 interface BattleArenaProps {
   subject: SubjectId;
   progress: GameProgress;
@@ -99,6 +105,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   const currentHpRef = useRef(progress.hp);
   const onUpdateHpRef = useRef(onUpdateHp);
   const onGameOverRef = useRef(onGameOver);
+  const answerInputLockUntilRef = useRef(0);
+  const blockedAnswerKeysRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     onUpdateHpRef.current = onUpdateHp;
@@ -107,6 +115,13 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
   useEffect(() => {
     onGameOverRef.current = onGameOver;
   }, [onGameOver]);
+
+  // Battle baru dimulai: kunci jawaban A/D sebentar agar key repeat dari
+  // gerakan WASD di overworld tidak langsung menjawab soal pertama.
+  useEffect(() => {
+    answerInputLockUntilRef.current = Date.now() + BATTLE_START_ANSWER_LOCK_MS;
+    blockedAnswerKeysRef.current.clear();
+  }, []);
 
   useEffect(() => {
     if (showQuestions && progress.difficulty !== 'normal') {
@@ -231,6 +246,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
               isDodgingRef.current = false;
               setIsDodging(false);
               setShowQuestions(true); // Auto re-open questions for player
+              // Beri jeda sebelum A/D bisa menjawab lagi, karena pemain
+              // mungkin masih menahan A/D untuk bergerak saat dodge.
+              answerInputLockUntilRef.current = Date.now() + DODGE_END_ANSWER_LOCK_MS;
               bulletsRef.current = [];
               dodgeStartTime = 0;
               keysPressedRef.current = {}; // Fix for sticky touch inputs
@@ -1059,10 +1077,24 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
       if (isDodging) return; // Don't trigger actions if dodging
 
       if (showQuestions && currentQ.qType !== 'essay') {
-        if (e.key === '1' || e.key.toLowerCase() === 'a') handleAnswer(0);
-        if (e.key === '2' || e.key.toLowerCase() === 'b') handleAnswer(1);
-        if (e.key === '3' || e.key.toLowerCase() === 'c') handleAnswer(2);
-        if (e.key === '4' || e.key.toLowerCase() === 'd') handleAnswer(3);
+        const key = e.key.toLowerCase();
+        const isAdAnswerKey = key === 'a' || key === 'd';
+
+        if (isAdAnswerKey && Date.now() < answerInputLockUntilRef.current) {
+          // Catat tombol yang ditahan selama masa lock. Walaupun lock habis,
+          // tombol ini tetap tidak menjawab sampai pemain melepasnya.
+          blockedAnswerKeysRef.current.add(key);
+          return;
+        }
+
+        if (isAdAnswerKey && blockedAnswerKeysRef.current.has(key)) {
+          return;
+        }
+
+        if (e.key === '1' || key === 'a') handleAnswer(0);
+        if (e.key === '2' || key === 'b') handleAnswer(1);
+        if (e.key === '3' || key === 'c') handleAnswer(2);
+        if (e.key === '4' || key === 'd') handleAnswer(3);
       } else if (!showQuestions) {
         if (e.key === '1' || e.key.toLowerCase() === 'z') handleThink();
         if (e.key === '2' || e.key.toLowerCase() === 'x') handleObserve();
@@ -1070,9 +1102,21 @@ export const BattleArena: React.FC<BattleArenaProps> = ({
         if (e.key === '4' || e.key.toLowerCase() === 'v') handleTalk();
       }
     };
+
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [isDodging, showQuestions, currentQ]);
+
+  // Lepas status "tertahan" saat tombol A/D dilepas, sehingga pemain bisa
+  // menjawab lagi setelah lock selesai.
+  useEffect(() => {
+    const handleKeyUp = (e: KeyboardEvent) => {
+      blockedAnswerKeysRef.current.delete(e.key.toLowerCase());
+    };
+
+    window.addEventListener('keyup', handleKeyUp);
+    return () => window.removeEventListener('keyup', handleKeyUp);
+  }, []);
 
   return (
     <div className="flex flex-col items-center w-full max-w-4xl mx-auto font-mono text-white select-none">
